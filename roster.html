@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026/02 勤務表 | System Guard</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #0f172a; 
+            color: #e2e8f0; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0; 
+            overflow-x: hidden; 
+        }
+        .glass { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        
+        /* 班別標籤顏色戰術系統 */
+        .shift-day-b { background: #f59e0b; color: black; }   /* 日B: 黃色 */
+        .shift-night-e { background: #3b82f6; color: white; } /* 夜E: 藍色 */
+        .shift-night-b { background: #8b5cf6; color: white; } /* 夜B: 紫色 */
+        .shift-off-l { background: #10b981; color: white; }   /* 例假: 綠色 */
+        .shift-off-r { background: #06b6d4; color: white; }   /* 休息: 青色 */
+        .shift-off-f { background: #ef4444; color: white; }   /* 節日: 紅色 */
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        input, select {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const paths = {
+                calendar: "M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zM19 8H5V6h14v2z",
+                user: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+                settings: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.18-.08a2 2 0 0 0-2 2v.44a2 2 0 0 0 2 2h.18a2 2 0 0 1 1.73 1l.25.43a2 2 0 0 1 0 2l-.08.18a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.18.08a2 2 0 0 0 2-2v-.44a2 2 0 0 0-2-2h-.18a2 2 0 0 1-1.73-1l-.25-.43a2 2 0 0 1 0-2l.08-.18a2 2 0 0 0-2-2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+                close: "M18 6L6 18M6 6l12 12",
+                save: "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z M17 21v-8H7v8 M7 3v5h8"
+            };
+            return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d={paths[name] || ""}/></svg>;
+        };
+
+        // --- 2026/02 初始班表 (依據Excel更新) ---
+        // D:日B, E:夜E, B:夜B
+        // L:例假(綠), R:休息(青), F:節日(紅)
+        const DEFAULT_ROSTER = {
+            "盧家慶": ["L","D","D","R","D","D","D","L","D","D","F","D","D","D","L","D","D","D","D","D","D","L","F","F","F","F","D","D"],
+            "林榮宗": ["E","L","E","E","R","E","E","E","L","E","E","R","E","E","E","L","E","E","E","E","E","E","L","E","E","E","E","E"],
+            "蘇錦龍": ["B","L","E","E","E","R","E","E","B","L","F","E","E","E","L","E","E","E","E","E","E","B","L","B","B","B","R","F"],
+            "李國雄": ["D","D","L","D","D","D","R","D","D","L","F","R","F","F","D","D","L","D","D","R","F","D","D","L","F","F","D","D"]
+        };
+
+        const SHIFT_TYPES = {
+            "D": { label: "日B", time: "07-19", style: "shift-day-b" },
+            "E": { label: "夜E", time: "19-07", style: "shift-night-e" },
+            "B": { label: "夜B", time: "17-05", style: "shift-night-b" },
+            "L": { label: "例假", time: "休假", style: "shift-off-l" },
+            "R": { label: "休息", time: "休假", style: "shift-off-r" },
+            "F": { label: "節日", time: "休假", style: "shift-off-f" }
+        };
+
+        function App() {
+            const [roster, setRoster] = useState(DEFAULT_ROSTER);
+            const [guards, setGuards] = useState(Object.keys(DEFAULT_ROSTER));
+            const [selectedDay, setSelectedDay] = useState(null);
+            const [isEditingGuards, setIsEditingGuards] = useState(false);
+            const [tempGuards, setTempGuards] = useState([]);
+
+            useEffect(() => {
+                const savedRoster = localStorage.getItem('guard_roster_202602_v2');
+                const savedGuards = localStorage.getItem('guard_names_202602_v2');
+                if (savedRoster) setRoster(JSON.parse(savedRoster));
+                if (savedGuards) setGuards(JSON.parse(savedGuards));
+            }, []);
+
+            const saveData = (newRoster, newGuards) => {
+                setRoster(newRoster);
+                setGuards(newGuards);
+                localStorage.setItem('guard_roster_202602_v2', JSON.stringify(newRoster));
+                localStorage.setItem('guard_names_202602_v2', JSON.stringify(newGuards));
+            };
+
+            const handleGuardNameChange = (index, newName) => {
+                const newTemp = [...tempGuards];
+                newTemp[index] = newName;
+                setTempGuards(newTemp);
+            };
+
+            const saveGuardNames = () => {
+                const newRoster = {};
+                tempGuards.forEach((newName, index) => {
+                    const oldName = guards[index];
+                    newRoster[newName] = roster[oldName] || Array(28).fill("L");
+                });
+                saveData(newRoster, tempGuards);
+                setIsEditingGuards(false);
+            };
+
+            const updateShift = (name, dayIndex, newCode) => {
+                const newRoster = { ...roster };
+                newRoster[name][dayIndex] = newCode;
+                saveData(newRoster, guards);
+            };
+
+            const renderCalendar = () => {
+                const days = Array.from({length: 28}, (_, i) => i + 1);
+                
+                return days.map(day => {
+                    const onDuty = guards.map(name => {
+                        const code = roster[name][day-1];
+                        return { name, code, ...SHIFT_TYPES[code] };
+                    });
+
+                    // 找出誰上班 (不是休假系列的)
+                    const working = onDuty.filter(s => !['L','R','F'].includes(s.code));
+                    const isHoliday = onDuty.some(s => s.code === 'F'); // 當天有人放節日假
+
+                    return (
+                        <div 
+                            key={day} 
+                            onClick={() => setSelectedDay(day)}
+                            className={`aspect-square border border-white/5 rounded-xl flex flex-col items-center justify-start pt-1 cursor-pointer active:scale-95 transition-transform overflow-hidden relative ${isHoliday ? 'bg-red-900/10' : 'bg-slate-800/50'}`}
+                        >
+                            <span className={`text-[10px] font-black ${day===1 ? 'text-blue-400' : 'text-slate-400'}`}>{day}</span>
+                            <div className="flex flex-col gap-0.5 w-full px-0.5 mt-0.5">
+                                {working.slice(0, 2).map((shift, i) => (
+                                    <div key={i} className={`h-1.5 w-full rounded-full ${shift.style}`}></div>
+                                ))}
+                                {working.length === 0 && <div className="h-1.5 w-full rounded-full bg-green-500/30"></div>}
+                            </div>
+                        </div>
+                    );
+                });
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col safe-bottom bg-[#0f172a]">
+                    <header className="p-6 sticky top-0 z-50 glass border-b border-white/5 flex justify-between items-center bg-[#0f172a]/95">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-indigo-600 rounded-xl shadow-lg text-white"><Icon name="calendar" size={22}/></div>
+                            <div>
+                                <h1 className="text-lg font-black italic text-white tracking-tighter uppercase">DUTY ROSTER</h1>
+                                <p className="text-[9px] text-indigo-400 font-bold uppercase tracking-widest mt-0.5">2026年 02月</p>
+                            </div>
+                        </div>
+                        <button onClick={() => { setTempGuards([...guards]); setIsEditingGuards(true); }} className="p-2 text-slate-400 hover:text-white bg-slate-800/50 rounded-lg"><Icon name="settings" size={20}/></button>
+                    </header>
+
+                    <main className="flex-1 p-4 overflow-y-auto">
+                        
+                        {/* 班別說明 Legend */}
+                        <div className="grid grid-cols-3 gap-2 mb-6">
+                            <div className="text-[10px] font-bold px-2 py-1 rounded bg-[#f59e0b] text-black text-center">日B (07-19)</div>
+                            <div className="text-[10px] font-bold px-2 py-1 rounded bg-[#3b82f6] text-white text-center">夜E (19-07)</div>
+                            <div className="text-[10px] font-bold px-2 py-1 rounded bg-[#8b5cf6] text-white text-center">夜B (17-05)</div>
+                            <div className="text-[10px] font-bold px-2 py-1 rounded bg-[#10b981] text-white text-center">例假 (L)</div>
+                            <div className="text-[10px] font-bold px-2 py-1 rounded bg-[#06b6d4] text-white text-center">休息 (R)</div>
+                            <div className="text-[10px] font-bold px-2 py-1 rounded bg-[#ef4444] text-white text-center">節日 (F)</div>
+                        </div>
+
+                        <div className="grid grid-cols-7 text-center mb-2">
+                            {['日', '一', '二', '三', '四', '五', '六'].map((d, i) => (
+                                <div key={d} className={`text-[10px] font-black ${i===0||i===6?'text-red-400':'text-slate-500'}`}>{d}</div>
+                            ))}
+                        </div>
+
+                        <div className="calendar-grid mb-8">
+                            {renderCalendar()}
+                        </div>
+
+                        {/* 工時統計 */}
+                        <div className="glass rounded-2xl p-5 border border-white/5">
+                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <Icon name="user" size={14}/> 本月應出勤天數
+                            </h3>
+                            <div className="grid grid-cols-2 gap-3">
+                                {guards.map(name => {
+                                    const workDays = roster[name] ? roster[name].filter(code => !['L','R','F'].includes(code)).length : 0;
+                                    return (
+                                        <div key={name} className="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl border border-white/5">
+                                            <span className="font-bold text-slate-200 text-sm">{name}</span>
+                                            <span className="font-black text-indigo-400 text-lg font-mono">{workDays} 天</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* 詳細排班編輯彈窗 */}
+                    {selectedDay && (
+                        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedDay(null)}>
+                            <div className="bg-[#1e293b] w-full sm:w-80 p-6 rounded-t-[2rem] sm:rounded-[2rem] border-t border-white/10 shadow-2xl animate-in slide-in-from-bottom" onClick={e => e.stopPropagation()}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-black text-white flex items-center gap-2">
+                                        <span className="bg-blue-600 px-2 rounded text-sm">2/{selectedDay}</span> 
+                                        排班設定
+                                    </h3>
+                                    <button onClick={() => setSelectedDay(null)} className="text-slate-500 p-2"><Icon name="close"/></button>
+                                </div>
+
+                                <div className="space-y-3 max-h-[50vh] overflow-y-auto">
+                                    {guards.map(name => {
+                                        const code = roster[name][selectedDay-1];
+                                        return (
+                                            <div key={name} className="flex items-center justify-between p-3 bg-slate-900 rounded-2xl border border-white/5">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center font-black text-slate-300 text-xs">
+                                                        {name[0]}
+                                                    </div>
+                                                    <p className="font-bold text-white text-sm">{name}</p>
+                                                </div>
+                                                <select 
+                                                    value={code} 
+                                                    onChange={(e) => updateShift(name, selectedDay-1, e.target.value)}
+                                                    className="w-28 text-xs font-bold"
+                                                >
+                                                    <option value="D">日B (07-19)</option>
+                                                    <option value="E">夜E (19-07)</option>
+                                                    <option value="B">夜B (17-05)</option>
+                                                    <option value="L">例假</option>
+                                                    <option value="R">休息日</option>
+                                                    <option value="F">節日</option>
+                                                </select>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 人員名稱編輯彈窗 */}
+                    {isEditingGuards && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in">
+                            <div className="bg-[#1e293b] w-80 p-6 rounded-[2rem] border border-white/10 shadow-2xl">
+                                <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2">
+                                    <Icon name="settings" className="text-blue-500"/> 編輯警衛名單
+                                </h3>
+                                <div className="space-y-3 mb-6">
+                                    {tempGuards.map((name, index) => (
+                                        <div key={index}>
+                                            <label className="text-[10px] text-slate-500 font-bold uppercase mb-1">警衛 {index + 1}</label>
+                                            <input value={name} onChange={(e) => handleGuardNameChange(index, e.target.value)} className="font-bold text-white" />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setIsEditingGuards(false)} className="flex-1 py-3 bg-slate-800 text-slate-400 rounded-xl font-bold text-xs">取消</button>
+                                    <button onClick={saveGuardNames} className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2"><Icon name="save"/> 儲存</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
