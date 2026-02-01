@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>通訊指揮錄 | System Guard</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #0f172a; 
+            color: #e2e8f0; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0; 
+            overflow-x: hidden; 
+        }
+        .glass { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        input { 
+            background: rgba(15, 23, 42, 0.8) !important; 
+            color: white !important; 
+            border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+            border-radius: 0.75rem !important; 
+            padding: 1rem !important; 
+            width: 100%;
+        }
+        .tag-dept { background: #3b82f6; color: white; }
+        .tag-factory { background: #f59e0b; color: black; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- 圖標組件 ---
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const paths = {
+                phone: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z",
+                mobile: "M12 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-4z M14 19h-2v-1h2v1z",
+                search: "M21 21l-4.35-4.35M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0z",
+                user: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+                book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20"
+            };
+            return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d={paths[name] || ""}/></svg>;
+        };
+
+        // --- 聯絡人資料庫 (已從您的檔案轉換) ---
+        const contactData = [
+            // 一廠 / 總部
+            { dept: "生產部", name: "黃仁貴", title: "經理", ext: "6622", mobile: "0972-108-202", factory: "一廠" },
+            { dept: "機械手", name: "趙淑芬", title: "副總", ext: "6628", mobile: "0923-217-836", factory: "一廠" },
+            { dept: "管理部", name: "洪文忠", title: "主任", ext: "6625", mobile: "0923-799-821", factory: "一廠" },
+            { dept: "品保課", name: "邱岱履", title: "課長", ext: "6623", mobile: "0928-188-551", factory: "一廠" },
+            { dept: "生產課", name: "陳秉宏", title: "課長", ext: "6616", mobile: "0923-303-889", factory: "一廠" },
+            { dept: "採購課", name: "王柳清", title: "組長", ext: "6639", mobile: "0918-401-169", factory: "一廠" },
+            { dept: "資訊室", name: "楊政諺", title: "組長", ext: "6640", mobile: "0935-722-585", factory: "一廠" },
+            { dept: "治工具組", name: "楊聖君", title: "組長", ext: "6610", mobile: "0982-070-965", factory: "一廠" },
+            { dept: "精研組", name: "陳俊和", title: "組長", ext: "6606", mobile: "0939-215-850", factory: "一廠" },
+            { dept: "齒輪組", name: "林崇仁", title: "組長", ext: "6665", mobile: "0960-402-290", factory: "一廠" },
+            { dept: "精車一組", name: "張啟榮", title: "組長", ext: "6659", mobile: "0917-680-799", factory: "一廠" },
+            { dept: "精車二組", name: "陳進凱", title: "組長", ext: "6608", mobile: "0953-607-071", factory: "一廠" },
+            { dept: "精铣一組", name: "林子翔", title: "組長", ext: "6604", mobile: "0910-416-485", factory: "一廠" },
+            { dept: "精铣二組", name: "蔡源彬", title: "組長", ext: "6607", mobile: "0921-728-127", factory: "一廠" },
+            { dept: "鈑金/表面", name: "鄭宏益", title: "組長", ext: "6644", mobile: "0919-685-547", factory: "一廠" },
+            { dept: "熱處理組", name: "巴  里", title: "組長", ext: "6611", mobile: "0917-606-041", factory: "一廠" },
+            { dept: "生產(夜)", name: "江志炫", title: "組長", ext: "6637", mobile: "0913-615-171", factory: "一廠" },
+            { dept: "組立組", name: "陳智能", title: "組長", ext: "6632", mobile: "0913-615-171", factory: "一廠" },
+            { dept: "生技課", name: "黃忠利", title: "課長", ext: "6617", mobile: "0927-282-313", factory: "一廠" },
+            { dept: "工務組", name: "劉葆洲", title: "專員", ext: "6603", mobile: "0919-007-287", factory: "一廠" },
+            { dept: "工務組", name: "李文欽", title: "專員", ext: "6613", mobile: "0923-187-712", factory: "一廠" },
+            { dept: "工務組", name: "陳茂發", title: "技術員", ext: "1319", mobile: "0921-007-811", factory: "一廠" },
+            { dept: "工務組", name: "陳文信", title: "技術員", ext: "1319", mobile: "0921-041-700", factory: "一廠" },
+            { dept: "外勞班長", name: "拿彭", title: "班長", ext: "6654", mobile: "0976-268-437", factory: "一廠" },
+            
+            // 二廠
+            { dept: "齒條課", name: "劉建成", title: "課長", ext: "6650", mobile: "0982-911-727", factory: "二廠" },
+            { dept: "齒條二組", name: "謝宗政", title: "組長", ext: "6646", mobile: "0953-510-669", factory: "二廠" },
+            { dept: "齒條組", name: "陳建宏", title: "領班", ext: "", mobile: "0982-635-551", factory: "二廠" },
+
+            // 三廠
+            { dept: "生產部", name: "林文彥", title: "經理", ext: "6602", mobile: "0923-686-559", factory: "三廠" },
+            { dept: "精車一組", name: "陳和欽", title: "組長", ext: "6642", mobile: "0987-591-225", factory: "三廠" },
+            { dept: "精車二組", name: "林志騰", title: "組長", ext: "", mobile: "0978-006-230", factory: "三廠" },
+            { dept: "精铣一組", name: "邱士豪", title: "組長", ext: "6615", mobile: "0977-477-284", factory: "三廠" },
+            { dept: "塑膠射出", name: "陳志遠", title: "組長", ext: "6671", mobile: "0929-034-964", factory: "三廠" },
+            { dept: "工務", name: "趙建能", title: "工務", ext: "6667", mobile: "0932-965-653", factory: "三廠" },
+        ];
+
+        function App() {
+            const [query, setQuery] = useState("");
+            const [results, setResults] = useState(contactData);
+
+            useEffect(() => {
+                const q = query.toLowerCase();
+                const filtered = contactData.filter(item => 
+                    item.name.toLowerCase().includes(q) || 
+                    item.dept.toLowerCase().includes(q) || 
+                    item.ext.includes(q) ||
+                    item.title.toLowerCase().includes(q)
+                );
+                setResults(filtered);
+            }, [query]);
+
+            return (
+                <div className="min-h-screen flex flex-col safe-bottom bg-[#0f172a]">
+                    {/* Header */}
+                    <header className="p-6 sticky top-0 z-50 glass border-b border-white/5 flex justify-between items-center bg-[#0f172a]/95">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-indigo-600 rounded-xl shadow-lg text-white"><Icon name="book" size={22}/></div>
+                            <div>
+                                <h1 className="text-lg font-black italic text-white tracking-tighter uppercase">CONTACTS</h1>
+                                <p className="text-[9px] text-indigo-400 font-bold uppercase tracking-widest mt-0.5">緊急通訊網路</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 p-5 space-y-6 overflow-y-auto">
+                        
+                        {/* 搜尋框 */}
+                        <div className="relative">
+                            <input 
+                                placeholder="搜尋姓名、部門或分機..." 
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                className="shadow-2xl"
+                            />
+                            <div className="absolute right-4 top-4 text-slate-500"><Icon name="search"/></div>
+                        </div>
+
+                        {/* 列表 */}
+                        <div className="space-y-4 pb-10">
+                            {results.length === 0 ? (
+                                <div className="text-center py-10 opacity-50">
+                                    <p className="text-sm font-bold text-slate-500">查無聯絡人資料</p>
+                                </div>
+                            ) : (
+                                results.map((item, index) => (
+                                    <div key={index} className="glass rounded-2xl p-5 border border-white/5 flex flex-col gap-4 shadow-lg">
+                                        
+                                        {/* 姓名與職稱 */}
+                                        <div className="flex justify-between items-start border-b border-white/5 pb-3">
+                                            <div className="flex gap-3">
+                                                <div className="w-12 h-12 bg-slate-700/50 rounded-full flex items-center justify-center text-slate-300 font-black text-lg">
+                                                    {item.name[0]}
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-black text-white">{item.name}</h3>
+                                                    <p className="text-xs text-slate-400 font-bold">{item.title}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col gap-1 items-end">
+                                                <span className="text-[9px] font-black px-2 py-0.5 rounded tag-dept">{item.dept}</span>
+                                                {item.factory !== "一廠" && <span className="text-[9px] font-black px-2 py-0.5 rounded tag-factory">{item.factory}</span>}
+                                            </div>
+                                        </div>
+
+                                        {/* 撥號按鈕 */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {item.ext ? (
+                                                <a href={`tel:${item.ext}`} className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-800 border border-slate-700 active:scale-95 transition-transform">
+                                                    <Icon name="phone" className="text-green-400"/>
+                                                    <div className="text-left">
+                                                        <p className="text-[9px] text-slate-500 font-bold uppercase">分機/手持</p>
+                                                        <p className="text-sm font-black text-white font-mono">{item.ext}</p>
+                                                    </div>
+                                                </a>
+                                            ) : (
+                                                <div className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-900/50 border border-slate-800 opacity-50">
+                                                    <span className="text-xs font-bold text-slate-600">無分機</span>
+                                                </div>
+                                            )}
+
+                                            {item.mobile ? (
+                                                <a href={`tel:${item.mobile}`} className="flex items-center justify-center gap-2 p-3 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-900/50 active:scale-95 transition-transform">
+                                                    <Icon name="mobile"/>
+                                                    <div className="text-left">
+                                                        <p className="text-[9px] text-blue-200 font-bold uppercase">手機號碼</p>
+                                                        <p className="text-sm font-black text-white font-mono">{item.mobile}</p>
+                                                    </div>
+                                                </a>
+                                            ) : (
+                                                <div className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-900/50 border border-slate-800 opacity-50">
+                                                    <span className="text-xs font-bold text-slate-600">無手機</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
