@@ -221,3 +221,35 @@
 </body>
 </html>
 
+<div id="dog-tcm-module" class="p-4 bg-green-900 rounded-lg text-white">
+    <h3 class="text-xl font-bold mb-4">🐾 狗狗中藥調理助手</h3>
+    
+    <select id="symptom-select" class="w-full p-2 text-black rounded mb-4">
+        <option value="">-- 請選擇狗狗症狀 --</option>
+        <option value="skin">皮膚搔癢 / 濕疹</option>
+        <option value="stomach">腸胃虛弱 / 食慾不振</option>
+        <option value="immune">免疫力提升 / 換季補氣</option>
+    </select>
+
+    <div id="tcm-result" class="bg-white text-black p-3 rounded-md hidden">
+        <p id="tcm-advice" class="font-medium"></p>
+        <p class="text-red-600 text-sm mt-2">⚠️ 提醒：請務必再次確認《本草綱目》藥量說明。</p>
+    </div>
+</div>
+
+<script>
+document.getElementById('symptom-select').addEventListener('change', function() {
+    const advice = {
+        'skin': '建議藥材：魚腥草、硫磺（外洗注意安全）。',
+        'stomach': '建議方劑：四君子湯（人參、白朮、茯苓、甘草）。',
+        'immune': '建議藥材：黃耆、黨參，提升狗狗正氣。'
+    };
+    const resultDiv = document.getElementById('tcm-result');
+    if(this.value) {
+        document.getElementById('tcm-advice').innerText = advice[this.value];
+        resultDiv.classList.remove('hidden');
+    } else {
+        resultDiv.classList.add('hidden');
+    }
+});
+</script>
