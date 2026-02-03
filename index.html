@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>護衛日誌 V13.1</title>
+    <title>護衛日誌 V13.1 - Gentle</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -36,9 +36,9 @@
                 <div class="max-w-md mx-auto pb-10">
                     {view === 'home' ? (
                         <div>
-                            <div class="flex justify-between items-center mb-8">
+                            <div class="flex justify-between items-center mb-8 px-1">
                                 <h1 class="text-xl font-bold text-slate-400">🛡️ 護衛日誌</h1>
-                                <span class="text-[9px] bg-white px-2 py-0.5 rounded-full text-slate-400 shadow-sm font-bold uppercase tracking-widest">V13.1 GENTLE</span>
+                                <span class="text-[9px] bg-white px-2 py-0.5 rounded-full text-slate-400 shadow-sm font-bold tracking-widest uppercase">V13.1 GENTLE</span>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-4 mb-8">
@@ -53,7 +53,7 @@
                             </div>
 
                             <div class="bg-white p-6 rounded-[2.5rem] mb-8 shadow-sm border border-white">
-                                <h2 class="text-[10px] font-bold mb-4 text-slate-300 tracking-[0.2em] text-center uppercase italic">毛孩速查面板</h2>
+                                <h2 class="text-[10px] font-bold mb-4 text-slate-300 tracking-[0.2em] text-center uppercase italic">蔡家軍速查面板</h2>
                                 <div class="grid grid-cols-3 gap-2">
                                     {dogs.map(d => (
                                         <button key={d.n} onClick={()=>setDog({n:d.n, t:d.t, s:true})} class="bg-slate-50/50 p-3 rounded-2xl text-xs font-bold text-slate-500 border border-slate-100 active:bg-white active:shadow-inner">
@@ -75,6 +75,7 @@
                                         <div class="text-[10px] text-slate-300 font-mono tracking-tighter">{l.now}</div>
                                     </div>
                                 ))}
+                                {logs.length === 0 && <p class="text-center text-slate-300 text-[10px] italic py-4">今天還沒有紀錄喔，小黑哥加油！</p>}
                             </div>
                         </div>
                     ) : (
@@ -87,7 +88,7 @@
                                     <button onClick={()=>{
                                         const v = document.getElementById('i1').value;
                                         if(v) save(view, view==='v'?{n:v}:{car:v});
-                                    }} class="flex-1 p-5 bg-slate-700 text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-transform">存檔</button>
+                                    }} class="flex-1 p-5 bg-slate-700 text-white rounded-2xl font-bold shadow-lg">存檔</button>
                                 </div>
                             </div>
                         </div>
