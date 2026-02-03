@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>神農本草守護者</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-emerald-950 text-white p-4 font-sans">
+    <div id="root"></div>
+                  { n: '杜仲', s: '補肝腎、強筋骨', d: '老犬保養。對後腿較無力、關節退化的狗狗有幫助。' },
+                { n: '續斷', s: '補肝腎、續筋骨', d: '常與杜仲合用。加強修復受損的筋骨組織。' },
+                { n: '神曲', s: '消食健胃', d: '針對食慾不振。狗狗肚子脹氣、不想吃飯時可用。' },
+                { n: '茯苓', s: '利水滲濕、健脾', d: '溫和利尿。幫助體內排濕，對腸胃虛弱的狗狗很好。' },
+
+    <script type="text/babel">
+        const { useState } = React;
+              { n: '杜仲', s: '補肝腎、強筋骨', d: '老犬保養聖品。對後腿無力、腰膝痠軟的狗狗很有幫助。' },
+        { n: '續斷', s: '續筋骨、補肝腎', d: '正如其名「續斷」，能幫助修復受損的筋骨，常與杜仲合用。' },
+        { n: '神曲', s: '消食健胃、和中', d: '狗狗食慾不振、肚子脹氣時的救星。能促進消化、開胃。' },
+        { n: '茯苓', s: '利水滲濕、健脾', d: '溫和利尿。幫助狗狗排出體內多餘濕氣，對脾胃也很好。' },
+
+        const App = () => {
+            const [search, setSearch] = useState('');
+            const herbs = [
+                      { n: '麥芽', s: '行氣消食、健脾開胃', d: '常用於消化不良。如果是妞妞或是狗狗吃太飽、肚子脹，這個很溫和。' },
+        { n: '川芎', s: '活血行氣、祛風止痛', d: '雖然是活血藥，但對頭痛、身體痠痛也有幫助。使用時要特別注意比例。' },
+        { n: '熟地黃', s: '補血養陰、填精益髓', d: '補血聖藥。對於體質虛弱、毛色無光澤的狗狗，有深層滋補的作用。' },
+        { n: '妞妞專屬筆記', s: '清熱、開胃、排毛', d: '妞妞是流浪貓，除了清熱藥材，也要注意腸胃蠕動，讓毛球好排出。' },
+
+                { n: '魚腥草', s: '清熱、解毒、消癰', d: '用於熱毒瘡瘍、狗狗皮膚紅腫。可用水煎汁外洗。' },
+                { n: '苦參', s: '清熱、燥濕、殺蟲', d: '用於濕疹、搔癢。是狗狗皮膚病常用的洗劑藥材。' },
+                { n: '黃耆', s: '補氣、固表、托毒', d: '提升免疫力。用於體質較弱、傷口難癒合的狗狗。' },
+                { n: '山藥', s: '補脾、養胃、生津', d: '調理腸胃敏感。對容易拉肚子的狗狗很好。' }
+            ];
+
+            const filtered = herbs.filter(h => h.n.includes(search) || h.s.includes(search));
+
+            return (
+                <div class="max-w-md mx-auto">
+                    <h1 class="text-2xl font-bold text-emerald-400 mb-2 flex items-center gap-2">🌿 神農本草守護者</h1>
+                    <p class="text-xs text-emerald-200/60 mb-6 italic">照顧 8 隻狗狗與妞妞🐱的專屬藥典</p>
+                    
+                    <input 
+                                          {/* 快捷對症搜尋開始 */}
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        {['皮膚', '沒胃口', '筋骨', '補氣', '妞妞'].map(tag => (
+                            <button 
+                                key={tag} 
+                                onClick={() => setSearch(tag)}
+                                class="text-[10px] bg-emerald-800/40 border border-emerald-500/30 px-3 py-1.5 rounded-xl active:bg-emerald-500"
+                            >
+                                #{tag}
+                            </button>
+                        ))}
+                        <button onClick={() => setSearch('')} class="text-[10px] bg-slate-700 px-3 py-1.5 rounded-xl">重置</button>
+                    </div>
+                    {/* 快捷對症搜尋結束 */}
+
+                        placeholder="🔍 輸入藥名或症狀 (如: 皮膚)" 
+                        class="w-full bg-emerald-900/50 p-4 rounded-2xl border border-emerald-500/30 mb-6 outline-none focus:ring-2 ring-emerald-500"
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    <div class="space-y-4">
+                        {filtered.map(h => (
+                            <div key={h.n} class="bg-slate-900/80 p-5 rounded-3xl border-l-4 border-emerald-500 shadow-xl">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h2 class="text-xl font-bold text-emerald-300">{h.n}</h2>
+                                    <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full border border-emerald-500/30">本草精華</span>
+                                </div>
+                                <p class="text-sm font-bold text-slate-300 mb-2">【功效】{h.s}</p>
+                                <p class="text-xs text-slate-400 leading-relaxed">【筆記】{h.d}</p>
+                            </div>
+                        ))}
+                    </div>
+                    {filtered.length === 0 && <p class="text-center text-slate-500 mt-10">尚無此紀錄，小黑哥要繼續精進喔！💪</p>}
+                </div>
+            );
+        };
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
