@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-[#f0f2f5] text-slate-600 p-4 font-sans min-h-screen">
+<body class="bg-[#f2f4f7] text-slate-600 p-4 font-sans min-h-screen">
     <div id="root"></div>
     <script type="text/babel">
         const { useState } = React;
@@ -36,55 +36,58 @@
                 <div class="max-w-md mx-auto pb-10">
                     {view === 'home' ? (
                         <div>
-                            <div class="flex justify-between items-end mb-8">
-                                <h1 class="text-2xl font-bold text-slate-400">🛡️ 護衛日誌</h1>
-                                <span class="text-[9px] bg-slate-200 px-2 py-0.5 rounded-full text-slate-500 font-bold uppercase">V13.1</span>
+                            <div class="flex justify-between items-center mb-8">
+                                <h1 class="text-xl font-bold text-slate-400">🛡️ 護衛日誌</h1>
+                                <span class="text-[9px] bg-white px-2 py-0.5 rounded-full text-slate-400 shadow-sm font-bold uppercase tracking-widest">V13.1 GENTLE</span>
                             </div>
+                            
                             <div class="grid grid-cols-2 gap-4 mb-8">
-                                <button onClick={()=>setView('v')} class="bg-white p-6 rounded-[2.5rem] shadow-sm active:bg-slate-50 transition-all text-center">
-                                    <span class="text-3xl block mb-2 opacity-70">👤</span>
+                                <button onClick={()=>setView('v')} class="bg-white p-6 rounded-[2.5rem] shadow-sm active:bg-slate-50 transition-all text-center border border-white">
+                                    <span class="text-3xl block mb-2 opacity-60">👤</span>
                                     <p class="font-bold text-slate-600">訪客</p>
                                 </button>
-                                <button onClick={()=>setView('t')} class="bg-white p-6 rounded-[2.5rem] shadow-sm active:bg-slate-50 transition-all text-center">
-                                    <span class="text-3xl block mb-2 opacity-70">🚚</span>
+                                <button onClick={()=>setView('t')} class="bg-white p-6 rounded-[2.5rem] shadow-sm active:bg-slate-50 transition-all text-center border border-white">
+                                    <span class="text-3xl block mb-2 opacity-60">🚚</span>
                                     <p class="font-bold text-slate-600">車輛</p>
                                 </button>
                             </div>
-                            <div class="bg-white p-6 rounded-[2.5rem] mb-8 shadow-sm">
-                                <h2 class="text-[10px] font-bold mb-4 text-slate-300 tracking-[0.2em] text-center uppercase">毛孩速查面板</h2>
+
+                            <div class="bg-white p-6 rounded-[2.5rem] mb-8 shadow-sm border border-white">
+                                <h2 class="text-[10px] font-bold mb-4 text-slate-300 tracking-[0.2em] text-center uppercase italic">毛孩速查面板</h2>
                                 <div class="grid grid-cols-3 gap-2">
                                     {dogs.map(d => (
-                                        <button key={d.n} onClick={()=>setDog({n:d.n, t:d.t, s:true})} class="bg-slate-50 p-3 rounded-2xl text-xs font-bold text-slate-500 border border-slate-100 active:bg-slate-200">
+                                        <button key={d.n} onClick={()=>setDog({n:d.n, t:d.t, s:true})} class="bg-slate-50/50 p-3 rounded-2xl text-xs font-bold text-slate-500 border border-slate-100 active:bg-white active:shadow-inner">
                                             {d.n}{d.cat?'🐱':''}
                                         </button>
                                     ))}
                                 </div>
                                 {dog.s && (
-                                    <div class="mt-5 p-4 bg-blue-50/50 rounded-2xl text-slate-600 text-sm border-l-4 border-blue-200">
+                                    <div class="mt-5 p-4 bg-blue-50/40 rounded-2xl text-slate-600 text-sm border-l-4 border-blue-200 shadow-inner">
                                         ✨ <b>{dog.n}</b>：{dog.t}
                                     </div>
                                 )}
                             </div>
+
                             <div class="space-y-3">
                                 {logs.map(l => (
-                                    <div key={l.id} class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm">
+                                    <div key={l.id} class="bg-white/80 p-4 rounded-2xl flex justify-between items-center shadow-sm border border-white">
                                         <div class="font-bold text-slate-500">{l.t==='v' ? l.n : l.car}</div>
-                                        <div class="text-[10px] text-slate-300 font-mono">{l.now}</div>
+                                        <div class="text-[10px] text-slate-300 font-mono tracking-tighter">{l.now}</div>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     ) : (
-                        <div class="bg-white p-8 rounded-[3rem] shadow-xl">
+                        <div class="bg-white p-8 rounded-[3rem] shadow-xl border border-white">
                             <h2 class="text-lg font-bold mb-6 text-slate-500">{view==='v'?'訪客登記':'車輛登記'}</h2>
                             <div class="space-y-4">
-                                <input id="i1" placeholder={view==='v'?'訪客姓名':'車牌號碼'} class="w-full bg-slate-50 p-5 rounded-2xl outline-none" />
+                                <input id="i1" placeholder={view==='v'?'輸入姓名':'輸入車號'} class="w-full bg-slate-50 p-5 rounded-2xl outline-none focus:bg-white transition-all shadow-inner" />
                                 <div class="flex gap-3 pt-4">
                                     <button onClick={()=>setView('home')} class="flex-1 p-5 bg-slate-100 text-slate-400 rounded-2xl font-bold">返回</button>
                                     <button onClick={()=>{
                                         const v = document.getElementById('i1').value;
                                         if(v) save(view, view==='v'?{n:v}:{car:v});
-                                    }} class="flex-1 p-5 bg-slate-700 text-white rounded-2xl font-bold">存檔</button>
+                                    }} class="flex-1 p-5 bg-slate-700 text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-transform">存檔</button>
                                 </div>
                             </div>
                         </div>
