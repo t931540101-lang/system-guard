@@ -1,289 +1,42 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
- <link rel="apple-touch-icon" href="你的圖片網址">
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>Field Utility v13</title>
-    <!-- 穩定版載入，確保不卡頓 -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #0f172a; color: #94a3b8; overflow: hidden; -webkit-tap-highlight-color: transparent; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .stealth-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(51, 65, 85, 0.5); backdrop-filter: blur(10px); }
-        .btn-active:active { transform: scale(0.96); opacity: 0.8; }
-<body class="min-h-screen flex flex-col overflow-y-auto select-none">
-    <h2 class="text-xl font-bold text-white mb-4">🐕 狗狗中醫體質速查</h2>
-    <div class="grid grid-cols-2 gap-2">
-    <button onclick="showAdvice('大黑', '燥熱體質。建議：魚腥草水外洗。')" class="bg-blue-600 p-3 rounded text-white text-sm">大黑</button>
-    <button onclick="showAdvice('小白', '脾胃虛。建議：四君子湯補氣。')" class="bg-blue-600 p-3 rounded text-white text-sm">小白</button>
-    <button onclick="showAdvice('小黃', '老犬關節。建議：杜仲、續斷。')" class="bg-blue-600 p-3 rounded text-white text-sm">小黃</button>
-    <button onclick="showAdvice('阿布', '腸胃敏感。建議：山藥、茯苓。')" class="bg-blue-600 p-3 rounded text-white text-sm">阿布</button>
-    <button onclick="showAdvice('皮皮', '活潑好動。日常保養即可。')" class="bg-blue-600 p-3 rounded text-white text-sm">皮皮</button>
-    <button onclick="showAdvice('虎斑', '注意皮膚濕疹。建議：苦參洗。')" class="bg-blue-600 p-3 rounded text-white text-sm">虎斑</button>
-    <button onclick="showAdvice('熊貓', '體質較弱。建議：黃耆補氣。')" class="bg-blue-600 p-3 rounded text-white text-sm">熊貓</button>
-    <button onclick="showAdvice('多多', '食慾不振。建議：神曲、麥芽。')" class="bg-blue-600 p-3 rounded text-white text-sm">多多</button>
-    <button onclick="showAdvice('妞妞(貓)', '日常清熱。建議：少量魚腥草。')" class="bg-orange-500 p-3 rounded text-white text-sm">妞妞 🐱</button>
-</div>
-
-
-    <div id="dog-advice-box" class="mt-4 p-3 bg-white rounded-lg hidden">
-        <h4 id="dog-name" class="font-bold text-blue-800"></h4>
-        <p id="dog-text" class="text-gray-700 mt-1"></p>
-    </div>
-</div>
-
-<script>
-function showAdvice(name, text) {
-    document.getElementById('dog-advice-box').classList.remove('hidden');
-    document.getElementById('dog-name').innerText = '🐾 ' + name + ' 的調理筆記：';
-    document.getElementById('dog-text').innerText = text;
-}
-</script>
-
-     .hide-scrollbar::-webkit-scrollbar { display: none; }
-        @keyframes scanline { 0% { top: -10%; } 100% { top: 110%; } }
-        .scanner::after { content: ""; position: absolute; width: 100%; height: 1px; background: rgba(59, 130, 246, 0.2); animation: scanline 4s linear infinite; pointer-events: none; }
-    </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden select-none scanner">
+
+<body class="min-h-screen bg-slate-900 overflow-y-auto select-none">
     <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <div class="p-4 bg-slate-800 rounded-xl m-4 shadow-lg text-white">
+        <h2 class="text-xl font-bold mb-4">🐕 狗狗中醫體質速查</h2>
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="showAdvice('大黑', '容易燥熱、皮膚搔癢。')" class="bg-blue-600 p-3 rounded">大黑</button>
+            <button onclick="showAdvice('小白', '脾胃較虛、食慾不振。')" class="bg-blue-600 p-3 rounded">小白</button>
+            <button onclick="showAdvice('小黃', '老犬關節保養。')" class="bg-blue-600 p-3 rounded">小黃</button>
+            <button onclick="showAdvice('阿布', '腸胃敏感。')" class="bg-blue-600 p-3 rounded">阿布</button>
+            <button onclick="showAdvice('皮皮', '活潑好動。')" class="bg-blue-600 p-3 rounded">皮皮</button>
+            <button onclick="showAdvice('虎斑', '注意皮膚濕疹。')" class="bg-blue-600 p-3 rounded">虎斑</button>
+            <button onclick="showAdvice('熊貓', '體質較弱。')" class="bg-blue-600 p-3 rounded">熊貓</button>
+            <button onclick="showAdvice('多多', '食慾不振。')" class="bg-blue-600 p-3 rounded">多多</button>
+            <button onclick="showAdvice('妞妞(貓)', '日常清熱解毒。')" class="bg-orange-500 p-3 rounded">妞妞 🐱</button>
+        </div>
+        <div id="dog-advice-box" class="mt-4 p-3 bg-white rounded-lg hidden text-black">
+            <h4 id="dog-name" class="font-bold text-blue-800"></h4>
+            <p id="dog-text" class="mt-1"></p>
+        </div>
+    </div>
 
-        // SVG 圖標組件 (手動定義以確保不依賴外部連結)
-        const Icon = ({ d, size = 22, color = "currentColor", className = "" }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                <path d={d} />
-            </svg>
-        );
-
-        const PATHS = {
-            search: "M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.35-4.35",
-            visitor: "M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M8.5 7a4 4 0 100-8 4 4 0 000 8z",
-            truck: "M1 3h15v13H1V3zm15 5h4l3 3v5h-7V8zM5.5 18.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm13 0a2.5 2.5 0 100-5 2.5 2.5 0 000 5z",
-            staff: "M17 21v-2a4 4 0 00-3-3.87M9 7a4 4 0 100-8 4 4 0 000 8zM9 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2",
-            back: "M19 12H5M12 19l-7-7 7-7",
-            node: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-        };
-
-        const App = () => {
-            const [view, setView] = useState('dashboard');
-            const [logs, setLogs] = useState([]);
-            const [queryStr, setQueryStr] = useState('');
-            const [formData, setFormData] = useState({ name: '', people: '1', comp: '', host: '', purp: '', tel: '', id: '', plate: '', driver: '', reason: '' });
-            const [unlockSteps, setUnlockSteps] = useState(0);
-
-            // 1. 讀取歷史資料 (LocalStorage 作為手機本地緩衝)
-            useEffect(() => {
-                const saved = localStorage.getItem('field_logs');
-                if (saved) setLogs(JSON.parse(saved));
-            }, []);
-
-            // 2. 分機表數據 (依據照片校對)
-            const directory = [
-                { d: '生產部', n: '經理室', e: '8000' }, { d: '生產部', n: '財務室', e: '1101' },
-                { d: '管理部', n: '警衛室', e: '9' }, { d: '資材部', n: '出貨組', e: '6618' },
-                { d: '研發部', n: '組長室', e: '3101' }, { d: '品保部', n: '課長室', e: '4301' },
-                { d: '生技部', n: '技術組', e: '4101' }
-            ];
-
-            const commit = (cat) => {
-                const now = new Date();
-                const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-                const dateStr = `${now.getMonth()+1}/${now.getDate()}`;
-                
-                const summary = cat === 'VISIT' ? `${formData.name} [${formData.comp}] >找 ${formData.host}` : 
-                                 cat === 'TRUCK' ? `${formData.plate} (${formData.comp})` : `${formData.name} [${formData.reason || '進出'}]`;
-                
-                const newLog = { id: Date.now(), cat, summary, time: timeStr, date: dateStr, exit: null };
-                const updatedLogs = [newLog, ...logs].slice(0, 20);
-                
-                setLogs(updatedLogs);
-                localStorage.setItem('field_logs', JSON.stringify(updatedLogs));
-                setFormData({ name: '', people: '1', comp: '', host: '', purp: '', tel: '', id: '', plate: '', driver: '', reason: '' });
-                setView('dashboard');
-            };
-
-            const markExit = (id) => {
-                const now = new Date();
-                const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-                const updated = logs.map(l => l.id === id ? { ...l, exit: time } : l);
-                setLogs(updated);
-                localStorage.setItem('field_logs', JSON.stringify(updated));
-            };
-
-            const Dashboard = () => (
-                <div className="p-4 space-y-4 animate-in fade-in pb-24 text-slate-800">
-                    {/* 分機查詢 */}
-                    <div className="bg-slate-800 p-5 rounded-[2.5rem] border border-slate-700 shadow-2xl">
-                        <div className="flex justify-between items-center mb-3 px-2">
-                            <div className="flex items-center gap-2">
-                                <Icon d={PATHS.search} color="#4b5563" size={14} />
-                                <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none italic">PORT_QUERY_ACTIVE</p>
-                            </div>
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse"></div>
-                        </div>
-                        <input type="text" placeholder="搜尋人名或分機..." onChange={e => setQueryStr(e.target.value)} className="w-full bg-slate-900/50 p-4 rounded-2xl border border-slate-700 text-blue-400 font-bold outline-none placeholder:text-slate-800" />
-                        {queryStr && (
-                            <div className="mt-3 space-y-1.5 max-h-40 overflow-y-auto hide-scrollbar">
-                                {directory.filter(i => i.n.includes(queryStr) || i.e.includes(queryStr)).map(i => (
-                                    <div key={i.e} className="bg-slate-900/40 p-3 rounded-xl flex justify-between items-center border border-white/5 animate-in slide-in-from-top-1">
-                                        <span className="text-sm font-bold text-slate-300">{i.n} ({i.d})</span>
-                                        <span className="text-xl font-black text-blue-600 mono">#{i.e}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* 按鈕選單 */}
-                    <div className="grid grid-cols-1 gap-3">
-                        <button onClick={() => setView('visit')} className="bg-white p-6 rounded-[2.5rem] border-b-4 border-slate-200 flex items-center gap-5 active:translate-y-1 active:border-b-0 shadow-lg">
-                            <div className="bg-indigo-50 p-3 rounded-2xl text-indigo-500"><Icon d={PATHS.visitor} size={28} /></div>
-                            <div className="text-left leading-tight"><h3 className="font-black text-slate-700 text-lg italic tracking-tight">訪客進出登記簿</h3><p className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Match_Paper: Visit</p></div>
-                        </button>
-                        <button onClick={() => setView('truck')} className="bg-white p-6 rounded-[2.5rem] border-b-4 border-slate-200 flex items-center gap-5 active:translate-y-1 active:border-b-0 shadow-lg">
-                            <div className="bg-blue-50 p-3 rounded-2xl text-blue-500"><Icon d={PATHS.truck} size={28} /></div>
-                            <div className="text-left leading-tight"><h3 className="font-black text-slate-700 text-lg italic tracking-tight">車輛物品登記表</h3><p className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Match_Paper: Truck</p></div>
-                        </button>
-                        <button onClick={() => setView('staff')} className="bg-white p-6 rounded-[2.5rem] border-b-4 border-slate-200 flex items-center gap-5 active:translate-y-1 active:border-b-0 shadow-lg">
-                            <div className="bg-emerald-50 p-3 rounded-2xl text-emerald-500"><Icon d={PATHS.staff} size={28} /></div>
-                            <div className="text-left leading-tight"><h3 className="font-black text-slate-700 text-lg italic tracking-tight">員工進出登記表</h3><p className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Match_Paper: Staff</p></div>
-                        </button>
-                    </div>
-
-                    {/* 歷史日誌 */}
-                    <div className="space-y-2 pb-10">
-                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest italic ml-2 px-2 underline decoration-slate-800 underline-offset-4">Local_Kernel_Buffer</p>
-                        {logs.map(log => (
-                            <div key={log.id} className="bg-slate-900/60 border border-slate-800 rounded-[2rem] p-5 flex flex-col gap-1.5 shadow-2xl">
-                                <div className="flex justify-between items-center"><span className="text-[8px] font-mono text-slate-500 bg-slate-800 px-2 py-0.5 rounded tracking-widest uppercase italic">{log.cat}</span><span className="text-[10px] font-mono text-blue-900 font-bold">{log.date} {log.time}</span></div>
-                                <div className="flex justify-between items-end">
-                                    <p className="text-sm font-bold text-slate-200 tracking-tight leading-tight">{log.summary}</p>
-                                    {log.exit ? <span className="text-[10px] font-mono text-emerald-600 font-black italic border border-emerald-900/40 px-2 rounded">EXIT: {log.exit}</span> : <button onClick={() => markExit(log.id)} className="bg-blue-600 text-white text-[10px] px-4 py-1.5 rounded-full font-black animate-pulse shadow-lg uppercase italic">補登出</button>}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-
-            return (
-                <div className="max-w-md mx-auto h-screen bg-slate-900 flex flex-col relative shadow-2xl overflow-hidden">
-                    <header className="p-6 pt-12 border-b border-slate-800 bg-slate-900/90 flex justify-between items-center z-50">
-                        <div className="flex items-center gap-3">
-                            <Icon d={PATHS.node} color="#3b82f6" size={24} />
-                            <div>
-                                <h1 className="text-white text-xs font-mono font-black tracking-widest uppercase italic leading-none">FIELD_UTILITY_V13</h1>
-                                <p className="text-[8px] text-slate-600 font-mono mt-1 uppercase">2026.02.02 | STATION_ALPHA</p>
-                            </div>
-                        </div>
-                        <button onClick={() => setView('dashboard')} className="text-slate-600 hover:text-white"><Icon d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" size={18}/></button>
-                    </header>
-
-                    <main className="flex-1 overflow-y-auto relative bg-[#f1f5f9]">
-                        {view === 'dashboard' && <Dashboard />}
-                        {['visit', 'truck', 'staff'].includes(view) && (
-                            <div className="p-4 space-y-6 animate-in slide-in-from-right">
-                                <button onClick={() => setView('dashboard')} className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1"><Icon d={PATHS.back} size={14} /> EXIT</button>
-                                <div className="bg-white p-8 rounded-[3.5rem] shadow-2xl space-y-4 border border-slate-200 text-slate-800">
-                                    <h2 className="text-center font-black text-2xl border-b pb-4 italic tracking-tighter uppercase">{view}_Input</h2>
-                                    <div className="space-y-4 text-[10px] font-mono px-1">
-                                        {view === 'visit' && (
-                                            <div className="grid grid-cols-2 gap-3 text-slate-400">
-                                                <div className="col-span-1"><label>姓名</label><input type="text" onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-50 p-4 rounded-xl border font-black text-slate-800 outline-none focus:border-blue-500" /></div>
-                                                <div className="col-span-1"><label>人數</label><input type="number" defaultValue="1" onChange={e => setFormData({...formData, people: e.target.value})} className="w-full bg-slate-50 p-4 rounded-xl border font-black text-center text-slate-800 outline-none focus:border-blue-500" /></div>
-                                                <div className="col-span-2"><label>公司單位</label><input type="text" onChange={e => setFormData({...formData, comp: e.target.value})} className="w-full bg-slate-50 p-4 rounded-xl border font-bold text-slate-800" /></div>
-                                                <div className="col-span-1"><label>受訪人</label><input type="text" onChange={e => setFormData({...formData, host: e.target.value})} className="w-full bg-slate-50 p-4 rounded-xl border font-bold text-slate-800" /></div>
-                                                <div className="col-span-1"><label>編號</label><input type="text" onChange={e => setFormData({...formData, id: e.target.value})} className="w-full bg-slate-50 p-4 rounded-xl border font-black text-blue-600 text-center uppercase" /></div>
-                                                <button onClick={() => commit('VISIT')} className="col-span-2 mt-4 bg-slate-900 text-white p-6 rounded-3xl font-black text-xl active:scale-95 uppercase italic">Confirm_Commit</button>
-                                            </div>
-                                        )}
-                                        {view === 'truck' && (
-                                            <div className="space-y-4 text-slate-400">
-                                                <div><label>公司名稱</label><input type="text" onChange={e => setFormData({...formData, comp: e.target.value})} className="w-full bg-slate-50 p-5 rounded-2xl border font-black text-slate-800" /></div>
-                                                <div><label>駕駛姓名</label><input type="text" onChange={e => setFormData({...formData, driver: e.target.value})} className="w-full bg-slate-50 p-5 rounded-2xl border font-black text-slate-800" /></div>
-                                                <div><label>車牌號碼</label><input type="text" placeholder="例: AA-1234" onChange={e => setFormData({...formData, plate: e.target.value})} className="w-full bg-slate-50 p-6 rounded-2xl border font-black text-4xl text-blue-600 text-center uppercase" /></div>
-                                                <button onClick={() => commit('TRUCK')} className="w-full mt-4 bg-slate-900 text-white p-6 rounded-3xl font-black text-xl active:scale-95 uppercase italic">Confirm_Commit</button>
-                                            </div>
-                                        )}
-                                        {view === 'staff' && (
-                                            <div className="space-y-6 text-slate-400">
-                                                <div><label className="text-center block text-lg font-black uppercase">員工姓名</label><input type="text" onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-50 p-6 rounded-3xl border font-black text-3xl text-center text-slate-800 shadow-inner" /></div>
-                                                <div><label className="text-center block">事由 (加班/請假/公出)</label><input type="text" placeholder="加班" onChange={e => setFormData({...formData, reason: e.target.value})} className="w-full bg-slate-50 p-6 rounded-3xl border font-bold text-xl text-center text-slate-800" /></div>
-                                                <button onClick={() => commit('STAFF')} className="w-full mt-4 bg-emerald-600 text-white p-7 rounded-3xl font-black text-xl active:scale-95 uppercase italic">Confirm_Entry</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {view === 'vault' && (
-                            <div className="fixed inset-0 bg-slate-950 z-[100] p-12 flex flex-col items-center justify-center text-center animate-in zoom-in">
-                                <div className="text-6xl mb-10 opacity-20 grayscale">🐕</div>
-                                <h2 className="text-2xl font-black text-white mb-10 tracking-[0.3em] border-b border-slate-800 pb-5 uppercase italic">Private_Vault</h2>
-                                <div className="space-y-8 text-slate-500 italic text-xl leading-loose">
-                                    <p>「永遠記住祖先與觀世音姐姐」</p>
-                                    <p>「這輩子好好的彌補，完成承諾」</p>
-                                </div>
-                                <button onClick={() => setView('dashboard')} className="mt-20 text-[10px] text-slate-800 font-mono tracking-widest uppercase border border-slate-900 px-6 py-2 rounded-full italic">Vault_Close</button>
-                            </div>
-                        )}
-                    </main>
-
-                    <footer className="p-8 bg-slate-900 text-center border-t border-slate-800" onClick={() => setUnlockSteps(prev => (prev + 1 >= 5 ? (setView('vault'), 0) : prev + 1))}>
-                        <p className="text-[9px] text-slate-700 font-mono font-bold tracking-[0.4em] uppercase italic leading-none">Diagnostic_Node_Active_V13</p>
-                        <p className="text-[8px] text-slate-800 mt-2 tracking-widest uppercase italic underline decoration-slate-700 underline-offset-4 font-bold">Secure Local Buffer | CMD_BLACK</p>
-                    </footer>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+    <script>
+    function showAdvice(name, text) {
+        document.getElementById('dog-advice-box').classList.remove('hidden');
+        document.getElementById('dog-name').innerText = '🐾 ' + name + ' 的調理筆記：';
+        document.getElementById('dog-text').innerText = text;
+    }
     </script>
 </body>
 </html>
-
-<div id="dog-tcm-module" class="p-4 bg-green-900 rounded-lg text-white">
-    <h3 class="text-xl font-bold mb-4">🐾 狗狗中藥調理助手</h3>
-    
-    <select id="symptom-select" class="w-full p-2 text-black rounded mb-4">
-        <option value="">-- 請選擇狗狗症狀 --</option>
-        <option value="skin">皮膚搔癢 / 濕疹</option>
-        <option value="stomach">腸胃虛弱 / 食慾不振</option>
-        <option value="immune">免疫力提升 / 換季補氣</option>
-    </select>
-
-    <div id="tcm-result" class="bg-white text-black p-3 rounded-md hidden">
-        <p id="tcm-advice" class="font-medium"></p>
-        <p class="text-red-600 text-sm mt-2">⚠️ 提醒：請務必再次確認《本草綱目》藥量說明。</p>
-    </div>
-</div>
-
-<script>
-document.getElementById('symptom-select').addEventListener('change', function() {
-    const advice = {
-        'skin': '建議藥材：魚腥草、硫磺（外洗注意安全）。',
-        'stomach': '建議方劑：四君子湯（人參、白朮、茯苓、甘草）。',
-        'immune': '建議藥材：黃耆、黨參，提升狗狗正氣。'
-    };
-    const resultDiv = document.getElementById('tcm-result');
-    if(this.value) {
-        document.getElementById('tcm-advice').innerText = advice[this.value];
-        resultDiv.classList.remove('hidden');
-    } else {
-        resultDiv.classList.add('hidden');
-    }
-});
-</script>
