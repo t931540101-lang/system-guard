@@ -3,105 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>2月官方排班系統</title>
+    <title>自訂排班系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-[#f8f9fa] text-slate-700 p-4 font-sans min-h-screen">
+<body class="bg-[#f2f5f9] text-slate-700 p-4 font-sans min-h-screen">
     <div id="root"></div>
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
         const App = () => {
+            const [currentMonth, setCurrentMonth] = useState(2); // 預設2月
             const [selectedName, setSelectedName] = useState('邱鴻鈞');
+            const [schedule, setSchedule] = useState({});
+
+            // 班別循環：夜E -> 夜B -> 日B -> 休
+            const types = ['夜E班', '夜B班', '日B班', '休假 ✨'];
             
-            // 班別時間定義
-            const shiftTimes = {
-                '日B班': '07:00 ~ 19:00',
-                '夜E班': '19:00 ~ 07:00',
-                '夜B班': '17:00 ~ 05:00',
-                '例假': '休假 ✨',
-                '休息日': '休假 ✨',
-                '節日': '國定假日 🚩'
+            // 點擊切換班別的功能
+            const toggleShift = (day) => {
+                const current = schedule[day] || '休假 ✨';
+                const nextIndex = (types.indexOf(current) + 1) % types.length;
+                setSchedule({...schedule, [day]: types[nextIndex]});
             };
 
-            // 2月份官方數據 (盧, 何, 蔡, 邱)
-            const allStaff = {
-                '邱鴻鈞': {
-                    id: 'D04132', base: '夜E班',
-                    schedule: { 1:'夜E班', 2:'夜E班', 3:'例假', 4:'夜E班', 5:'夜E班', 6:'夜E班', 7:'夜E班', 8:'夜E班', 9:'夜E班', 10:'例假', 11:'夜E班', 12:'夜E班', 13:'夜E班', 14:'節日', 15:'休息日', 16:'節日', 17:'例假', 18:'節日', 19:'節日', 20:'夜E班', 21:'夜E班', 22:'夜E班', 23:'例假', 24:'夜E班', 25:'夜E班', 26:'夜E班', 27:'夜E班', 28:'節日' }
-                },
-                '蔡易倫': {
-                    id: 'D03806', base: '夜E班',
-                    schedule: { 1:'夜B班', 2:'節日', 3:'夜B班', 4:'夜B班', 5:'例假', 6:'夜B班', 7:'夜B班', 8:'夜B班', 9:'節日', 10:'夜B班', 11:'夜B班', 12:'例假', 13:'夜B班', 14:'夜B班', 15:'夜B班', 16:'休息日', 17:'節日', 18:'節日', 19:'例假', 20:'夜B班', 21:'夜B班', 22:'夜B班', 23:'節日', 24:'夜B班', 25:'夜B班', 26:'例假', 27:'夜B班', 28:'夜B班' }
-                },
-                '盧家慶': {
-                    id: 'D01762', base: '日B班',
-                    schedule: { 1:'例假', 2:'日B班', 3:'日B班', 4:'休息日', 5:'日B班', 6:'日B班', 7:'日B班', 8:'例假', 9:'日B班', 10:'日B班', 11:'節日', 12:'日B班', 13:'日B班', 14:'日B班', 15:'例假', 16:'日B班', 17:'日B班', 18:'日B班', 19:'日B班', 20:'日B班', 21:'日B班', 22:'例假', 23:'節日', 24:'節日', 25:'節日', 26:'節日', 27:'日B班', 28:'日B班' }
-                },
-                '何鴻隆': {
-                    id: 'D03807', base: '日B班',
-                    schedule: { 1:'日B班', 2:'日B班', 3:'日B班', 4:'日B班', 5:'日B班', 6:'休息日', 7:'例假', 8:'日B班', 9:'日B班', 10:'日B班', 11:'日B班', 12:'日B班', 13:'例假', 14:'日B班', 15:'日B班', 16:'節日', 17:'節日', 18:'節日', 19:'節日', 20:'例假', 21:'日B班', 22:'日B班', 23:'日B班', 24:'日B班', 25:'日B班', 26:'日B班', 27:'節日', 28:'例假' }
-                }
-            };
-
-            const today = new Date().getDate();
-            const person = allStaff[selectedName];
-            const todayShift = person.schedule[today];
+            const daysInMonth = currentMonth === 2 ? 28 : 31;
 
             return (
-                <div className="max-w-md mx-auto pb-10">
+                <div className="max-w-md mx-auto pb-24">
                     <div className="flex items-center justify-between mb-6 mt-6 px-4">
-                        <h1 className="text-xl font-black text-slate-800">📊 2月排班查詢</h1>
-                        <span className="text-[10px] bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-bold">官方版</span>
+                        <div className="flex items-center gap-2 text-2xl font-black text-slate-800">
+                            <span>📅</span>
+                            <select 
+                                className="bg-transparent border-none outline-none focus:ring-0"
+                                value={currentMonth}
+                                onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
+                            >
+                                <option value={1}>1月</option>
+                                <option value={2}>2月</option>
+                                <option value={3}>3月</option>
+                            </select>
+                        </div>
+                        <span className="text-[10px] bg-amber-100 text-amber-600 px-3 py-1 rounded-full font-bold animate-pulse">編輯模式</span>
                     </div>
 
                     {/* 人員選擇 */}
                     <div className="flex gap-2 mb-6 px-2 overflow-x-auto pb-2 no-scrollbar">
-                        {Object.keys(allStaff).map(name => (
+                        {['邱鴻鈞', '蔡易倫', '盧家慶', '何鴻隆'].map(name => (
                             <button 
                                 key={name}
                                 onClick={() => setSelectedName(name)}
-                                className={`px-5 py-3 rounded-full text-sm font-bold whitespace-nowrap transition-all ${selectedName === name ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}
+                                className={`px-5 py-3 rounded-full text-sm font-bold whitespace-nowrap transition-all ${selectedName === name ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}
                             >
                                 {name}
                             </button>
                         ))}
                     </div>
 
-                    {/* 今日大卡片 */}
-                    <div className={`mx-2 p-8 rounded-[3rem] shadow-xl mb-8 border-4 transition-all ${todayShift.includes('休') || todayShift.includes('節') ? 'bg-white border-emerald-400' : 'bg-slate-800 border-blue-400 text-white'}`}>
-                        <div className="flex justify-between items-center mb-4 opacity-60">
-                            <span className="text-xs font-bold">2月{today}日 ({person.id})</span>
-                            <span className="text-xs font-black px-2 py-1 bg-white/10 rounded">{person.base}</span>
-                        </div>
-                        <h2 className="text-4xl font-black mb-2">{todayShift}</h2>
-                        <p className="text-sm font-bold opacity-80">{shiftTimes[todayShift]}</p>
-                    </div>
-
-                    {/* 整月預覽 */}
                     <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-50 mx-2">
-                        <div className="grid grid-cols-7 gap-1 text-center">
+                        <div className="mb-4 flex justify-between items-center text-[10px] font-bold text-slate-400 px-2 uppercase tracking-widest">
+                            <span>點擊日期切換班別</span>
+                            <span>{selectedName}</span>
+                        </div>
+                        <div className="grid grid-cols-7 gap-2 text-center">
                             {['日','一','二','三','四','五','六'].map(d => (
                                 <div key={d} className="text-[10px] font-bold text-slate-300 pb-2">{d}</div>
                             ))}
-                            {[...Array(28)].map((_, i) => {
+                            {[...Array(daysInMonth)].map((_, i) => {
                                 const day = i + 1;
-                                const s = person.schedule[day];
-                                const isOff = s.includes('例') || s.includes('休') || s.includes('節');
+                                const s = schedule[day] || '休假 ✨';
+                                const isWork = s.includes('班');
                                 return (
-                                    <div key={i} className={`py-2 rounded-xl text-[10px] font-bold ${day === today ? 'ring-2 ring-blue-500 bg-white z-10' : ''} ${isOff ? 'bg-rose-50 text-rose-400' : 'bg-blue-50 text-blue-600'}`}>
-                                        {day}<br/>{s.substring(0,2)}
-                                    </div>
+                                    <button 
+                                        key={i} 
+                                        onClick={() => toggleShift(day)}
+                                        className={`py-3 rounded-2xl text-[10px] font-bold transition-all active:scale-90 ${isWork ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-slate-50 text-slate-300 border border-transparent'}`}
+                                    >
+                                        {day}<br/><span className="text-[8px]">{s.substring(0,2)}</span>
+                                    </button>
                                 );
                             })}
                         </div>
                     </div>
 
-                    <div className="mt-8 px-6 text-[10px] text-slate-400 leading-relaxed text-center">
-                        <p>※ 數據源自 202602警衛輪班表.xls</p>
-                        <p>如有調班請以現場實際狀況為準 ✋✨</p>
+                    <div className="mt-8 px-8 text-xs text-slate-400 italic leading-relaxed">
+                        小黑哥，這個版本是讓妳「練習排班」用的。妳可以看著公司的 Excel 紙本，在這裡點一點，就能幫自己或同事排出最完美的班表！✋✨
+                    </div>
+
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex gap-4 z-50">
+                        <button onClick={() => window.location.reload()} className="bg-white text-slate-800 px-6 py-3 rounded-full shadow-xl font-bold border border-slate-100 text-xs">重設</button>
+                        <a href="index.html" className="bg-slate-800 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center border-2 border-white/20">🏠</a>
                     </div>
                 </div>
             );
