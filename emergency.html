@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>緊急聯絡</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-[#fff1f1] text-slate-600 p-4 font-sans min-h-screen">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+        const App = () => {
+            const [search, setSearch] = useState('');
+            
+            // 根據紙上的「緊急聯絡電話表」精選最重要的大頭
+            const emergencyList = [
+                { dept: '一廠-生產部', title: '經理', name: '黃仁貴', mobile: '0972-108202' },
+                { dept: '一廠-營業部', title: '副總', name: '趙淑芬', mobile: '0923-217836' },
+                { dept: '一廠-生產部', title: '課長', name: '陳秉宏', mobile: '0923-303889' },
+                { dept: '一廠-資訊室', title: '組長', name: '楊政諺', mobile: '0935-722585' },
+                { dept: '一廠-管理部', title: '主任', name: '洪文忠', mobile: '0923-799821' },
+                { dept: '三廠-生產部', title: '經理', name: '林文彥', mobile: '0923-686559' },
+                { dept: '三廠-精機一組', title: '組長', name: '陳和欽', mobile: '0987-591225' },
+                { dept: '工務-專員', title: '工務', name: '劉葆洲', mobile: '0919-007287' },
+                { dept: '守衛室', title: '同仁', name: '守衛室(1廠)', mobile: '0910-661900' }
+            ];
+
+            const filtered = emergencyList.filter(c => 
+                c.name.includes(search) || c.dept.includes(search) || c.title.includes(search)
+            );
+
+            return (
+                <div className="max-w-md mx-auto">
+                    <div className="flex items-center gap-3 mb-8 mt-6 px-2">
+                        <span className="text-4xl text-red-500 animate-pulse">🚨</span>
+                        <h1 className="text-2xl font-black text-red-600 tracking-tighter">緊急聯絡清單</h1>
+                    </div>
+
+                    <div className="mb-8">
+                        <input 
+                            type="text" 
+                            placeholder="快速搜尋姓名或單位..." 
+                            className="w-full p-5 rounded-[2.5rem] bg-white shadow-md border-2 border-red-100 outline-none focus:border-red-400 text-lg"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="space-y-4 pb-24">
+                        {filtered.map((c, i) => (
+                            <div key={i} className="bg-white p-6 rounded-[3rem] shadow-sm border border-red-50 flex justify-between items-center">
+                                <div className="flex-1">
+                                    <span className="text-[10px] text-red-400 font-bold bg-red-50 px-2 py-0.5 rounded-md mb-1 inline-block uppercase">{c.dept} | {c.title}</span>
+                                    <span className="text-2xl font-black text-slate-700 block tracking-tighter">{c.name}</span>
+                                </div>
+                                <a href={`tel:${c.mobile}`} className="bg-red-500 w-16 h-16 rounded-full flex items-center justify-center shadow-lg shadow-red-100 active:scale-90 transition-all">
+                                    <span className="text-white text-2xl">📞</span>
+                                </a>
+                            </div>
+                        ))}
+                    </div>
+
+                    <a href="index.html" className="fixed bottom-8 right-8 bg-slate-800 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl z-40 border-2 border-white/20 text-white">👤</a>
+                </div>
+            );
+        };
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
