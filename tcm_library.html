@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>中醫醫經寶典</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-[#fdfbf7] text-slate-700 p-4 font-sans min-h-screen">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('original');
+            
+            // 範例資料：神農本草經（這之後可以一章一章加）
+            const bookData = {
+                title: "神農本草經 - 上經",
+                chapter: "人參",
+                original: "味甘，微寒。主補五臟，安精神，定魂魄，止驚悸，除邪氣，明目，開心益智。",
+                note: "【五臟】指心、肝、脾、肺、腎。【驚悸】心跳不寧。",
+                translate: "味道甘甜，性質微涼。主要功能是補益五臟的精氣，安定精神與魂魄，停止驚嚇引起的心跳不安，驅除體內的邪氣，並能改善視力，使頭腦清醒、增長智慧。"
+            };
+
+            return (
+                <div className="max-w-md mx-auto">
+                    <div className="flex items-center gap-3 mb-8 mt-6">
+                        <span className="text-3xl">📜</span>
+                        <h1 className="text-2xl font-black text-amber-800 tracking-tighter">中醫醫經白話</h1>
+                    </div>
+
+                    <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-amber-100 mb-6">
+                        <span className="text-[10px] text-amber-400 font-bold bg-amber-50 px-3 py-1 rounded-full mb-3 inline-block">
+                            {bookData.title}
+                        </span>
+                        <h2 className="text-2xl font-black text-slate-700 mb-6 tracking-wide">【{bookData.chapter}】</h2>
+
+                        {/* 頁籤切換 */}
+                        <div className="flex gap-2 mb-6">
+                            {[
+                                {id:'original', label:'原文'},
+                                {id:'note', label:'註解'},
+                                {id:'translate', label:'白話'}
+                            ].map(tab => (
+                                <button 
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex-1 py-3 rounded-2xl font-bold transition-all ${activeTab === tab.id ? 'bg-amber-600 text-white shadow-lg' : 'bg-slate-50 text-slate-400'}`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* 內容顯示區 */}
+                        <div className="bg-[#fffcf9] p-6 rounded-3xl border border-amber-50 min-h-[200px] leading-loose text-lg italic text-slate-600">
+                            {activeTab === 'original' && <p className="font-serif">「{bookData.original}」</p>}
+                            {activeTab === 'note' && <p className="text-amber-800 font-medium whitespace-pre-line">{bookData.note}</p>}
+                            {activeTab === 'translate' && <p className="not-italic text-slate-700">{bookData.translate}</p>}
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs text-slate-300 px-4">
+                        <span>📖 研讀筆記：補五臟之首</span>
+                        <a href="index.html" className="underline">返回首頁</a>
+                    </div>
+                </div>
+            );
+        };
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
