@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>小黑上仙的守護領域</title>
     <style>
-        :root { --main: #2c3e50; --gold: #d4af37; --bg: #fdfaf6; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        .header { text-align: center; background: var(--main); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; border-bottom: 4px solid var(--gold); }
-        .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .nav-item { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; color: var(--main); font-weight: bold; font-size: 16px; border: 1px solid #eee; transition: 0.3s; }
-        .nav-item:hover { background: #eee; }
-        .content-section { display: none; background: white; padding: 20px; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        :root { --main: #2c3e50; --gold: #d4af37; --bg: #fdfaf6; --text: #34495e; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); }
+        .header { text-align: center; background: var(--main); color: white; padding: 20px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; }
+        .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .nav-item { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; border: 1px solid #eee; }
+        .nav-item:active { background: #eee; }
+        .content-section { display: none; background: white; padding: 15px; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .active { display: block; }
-        .dog-card { background: #fff9f0; border-left: 5px solid var(--gold); padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #888; border-top: 1px solid #ddd; padding-top: 15px; }
+        .card { background: #fff9f0; border-left: 5px solid var(--gold); padding: 10px; margin-bottom: 10px; border-radius: 5px; font-size: 15px; }
+        .dog-btn { display: inline-block; padding: 5px 10px; background: #eee; margin: 3px; border-radius: 5px; font-size: 14px; cursor: pointer; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--main); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .footer { text-align: center; margin-top: 20px; font-size: 13px; color: #888; border-top: 1px solid #ddd; padding-top: 10px; }
     </style>
 </head>
 <body>
@@ -25,37 +28,51 @@
 </div>
 
 <div class="nav-grid">
-    <div class="nav-item" onclick="show('diary')">📝 警衛日誌</div>
-    <div class="nav-item" onclick="show('medicine')">🌿 藥典精華</div>
-    <div class="nav-item" onclick="show('dogs')">🐕 孩子近況</div>
-    <div class="nav-item" onclick="show('phones')">📞 緊急分機</div>
+    <div class="nav-item" onclick="show('dogs')">🐕 A.孩子病歷</div>
+    <div class="nav-item" onclick="show('medicine')">🌿 B.萬用藥典</div>
+    <div class="nav-item" onclick="show('goal')">🏠 C.薪資目標</div>
+    <div class="nav-item" onclick="show('diary')">📝 巡邏日誌</div>
 </div>
 
-<div id="diary" class="content-section active">
-    <h3>📝 警衛日誌</h3>
-    <textarea style="width:100%; height:150px; padding:10px; border-radius:8px; border:1px solid #ccc;" id="note" placeholder="在此紀錄今日巡邏點滴..."></textarea>
-    <button onclick="save()" style="width:100%; margin-top:10px; padding:12px; background:var(--main); color:white; border:none; border-radius:8px; cursor:pointer;">儲存到本機 [cite: 2026-02-05]</button>
+<div id="dogs" class="content-section active">
+    <h3>🐕 孩子們的守護名單</h3>
+    <div style="margin-bottom:15px;">
+        <span class="dog-btn" onclick="setDog('張布丁')">張布丁</span>
+        <span class="dog-btn" onclick="setDog('蔡小白')">蔡小白</span>
+        <span class="dog-btn" onclick="setDog('蔡小花')">蔡小花</span>
+        <span class="dog-btn" onclick="setDog('來順')">來順</span>
+        <span class="dog-btn" onclick="setDog('蔡脯')">蔡脯</span>
+        <span class="dog-btn" onclick="setDog('蔡頭貴')">蔡頭貴</span>
+        <span class="dog-btn" onclick="setDog('哈蜜瓜')">哈蜜瓜</span>
+        <span class="dog-btn" onclick="setDog('有錢')">有錢</span>
+        <span class="dog-btn" onclick="setDog('妞妞')">妞妞</span>
+    </div>
+    <div id="dogDetail" class="card">點擊上方按鈕查看詳情 [cite: 2026-02-05]</div>
 </div>
 
 <div id="medicine" class="content-section">
-    <h3>🌿 藥典筆記 (33本藥典精華)</h3>
-    <div class="dog-card"><strong>【熱感冒】</strong>：觀察黃痰，愛克痰需加水稀釋 [cite: 2026-01-19, 2026-02-05]。</div>
-    <div class="dog-card"><strong>【日常】</strong>：觀察排便，多喝水 [cite: 2026-02-05]。</div>
+    <h3>🌿 中醫藥理精華</h3>
+    <div class="card"><strong>🔴 熱感冒/化痰</strong><br>觀察黃痰，愛克痰需加水稀釋。 [cite: 2026-01-19, 2026-02-05]</div>
+    <div class="card"><strong>🟡 消化不良</strong><br>注意排便形狀與頻率，增加飲水量。 [cite: 2026-02-05]</div>
+    <div class="card"><strong>🟢 日常保養</strong><br>心法：尊重生命，眾生平等。 [cite: 2026-02-05]</div>
 </div>
 
-<div id="dogs" class="content-section">
-    <h3>🐕 9個孩子名單</h3>
-    <p>張布丁、蔡小白、蔡小花、來順、蔡脯、蔡頭貴、哈蜜瓜、有錢、妞妞。</p>
+<div id="goal" class="content-section">
+    <h3>🏠 修行目標與紀錄</h3>
+    <div class="card">時數上限：288 小時/月 [cite: 2026-01-22]</div>
+    <div class="card">大月休 7 天 / 小月休 6 天 [cite: 2026-01-22]</div>
+    <div class="card"><strong>✨ 宏願</strong>：買 1000 萬房子接回祖先與觀音姐姐。 [cite: 2026-01-19, 2026-02-05]</div>
 </div>
 
-<div id="phones" class="content-section">
-    <h3>📞 緊急分機</h3>
-    <p>總機：0 [cite: 2026-02-05]</p>
+<div id="diary" class="content-section">
+    <h3>📝 每日修行筆記</h3>
+    <textarea id="note" rows="5" placeholder="紀錄今日巡邏狀況..."></textarea>
+    <button onclick="saveNote()">儲存紀錄 [cite: 2026-02-05]</button>
 </div>
 
 <div class="footer">
-    <div style="font-style: italic;">「不畏雷劫，唯愛永恆。」 [cite: 2026-02-05]</div>
-    <div>小黑哥 ✋✨ 專屬法器</div>
+    「做不到的事情，我決不會答應人家」 [cite: 2026-01-01]<br>
+    小黑哥 ✋✨ 專屬法器 2.0
 </div>
 
 <script>
@@ -64,12 +81,20 @@
         for (let s of sections) s.classList.remove('active');
         document.getElementById(id).classList.add('active');
     }
-    function save() {
-        localStorage.setItem('guardNote', document.getElementById('note').value);
-        alert('功德已儲存！ [cite: 2026-02-05]');
+    const dogs = {
+        '張布丁': '習性：愛撒嬌。紀錄：需注意化痰狀況。 [cite: 2026-02-05]',
+        '妞妞': '身份：貓仙子。紀錄：喜歡美味食物。 [cite: 2026-02-05]',
+        '有錢': '習性：守衛工廠。紀錄：近期食慾良好。 [cite: 2026-02-05]'
+    };
+    function setDog(name) {
+        document.getElementById('dogDetail').innerHTML = `<strong>【${name}】</strong><br>${dogs[name] || '目前無特別紀錄，持續守護中。 [cite: 2026-02-05]'}`;
+    }
+    function saveNote() {
+        localStorage.setItem('guardNoteV2', document.getElementById('note').value);
+        alert('功德已記錄！ [cite: 2026-02-05]');
     }
     window.onload = function() {
-        document.getElementById('note').value = localStorage.getItem('guardNote') || "";
+        document.getElementById('note').value = localStorage.getItem('guardNoteV2') || "";
     }
 </script>
 
