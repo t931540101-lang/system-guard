@@ -8,11 +8,13 @@
         :root { --main: #2c3e50; --gold: #d4af37; --bg: #fdfaf6; }
         body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .header { text-align: center; background: var(--main); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; border-bottom: 4px solid var(--gold); }
-        .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .nav-item { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-decoration: none; color: var(--main); font-weight: bold; font-size: 18px; border: 1px solid #eee; }
-        .nav-item:active { background: #eee; }
+        .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .nav-item { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; color: var(--main); font-weight: bold; font-size: 16px; border: 1px solid #eee; transition: 0.3s; }
+        .nav-item:hover { background: #eee; }
+        .content-section { display: none; background: white; padding: 20px; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .active { display: block; }
+        .dog-card { background: #fff9f0; border-left: 5px solid var(--gold); padding: 10px; margin-bottom: 10px; border-radius: 5px; }
         .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #888; border-top: 1px solid #ddd; padding-top: 15px; }
-        .quote { font-style: italic; color: var(--main); margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -23,25 +25,53 @@
 </div>
 
 <div class="nav-grid">
-    <a href="#" class="nav-item">📝 警衛日誌</a>
-    <a href="#" class="nav-item">🌿 藥典精華</a>
-    <a href="#" class="nav-item">🐕 孩子近況</a>
-    <a href="#" class="nav-item">📞 緊急分機</a>
+    <div class="nav-item" onclick="show('diary')">📝 警衛日誌</div>
+    <div class="nav-item" onclick="show('medicine')">🌿 藥典精華</div>
+    <div class="nav-item" onclick="show('dogs')">🐕 孩子近況</div>
+    <div class="nav-item" onclick="show('phones')">📞 緊急分機</div>
 </div>
 
-<div id="content-area" style="margin-top:20px; background:white; padding:15px; border-radius:12px; border:1px solid #ddd;">
-    <h3 style="color:var(--main); border-left: 4px solid var(--gold); padding-left:10px;">✨ 今日修行提醒</h3>
-    <ul style="padding-left:20px; line-height:1.8;">
-        <li>記得觀察孩子們的化痰狀況 [cite: 2026-02-05]</li>
-        <li>茶裏王喝了，心氣就順了 [cite: 2026-02-05]</li>
-        <li>祖先與觀音姐姐在心中守護著妳 [cite: 2026-01-05, 2026-01-19]</li>
-    </ul>
+<div id="diary" class="content-section active">
+    <h3>📝 警衛日誌</h3>
+    <textarea style="width:100%; height:150px; padding:10px; border-radius:8px; border:1px solid #ccc;" id="note" placeholder="在此紀錄今日巡邏點滴..."></textarea>
+    <button onclick="save()" style="width:100%; margin-top:10px; padding:12px; background:var(--main); color:white; border:none; border-radius:8px; cursor:pointer;">儲存到本機 [cite: 2026-02-05]</button>
+</div>
+
+<div id="medicine" class="content-section">
+    <h3>🌿 藥典筆記 (33本藥典精華)</h3>
+    <div class="dog-card"><strong>【熱感冒】</strong>：觀察黃痰，愛克痰需加水稀釋 [cite: 2026-01-19, 2026-02-05]。</div>
+    <div class="dog-card"><strong>【日常】</strong>：觀察排便，多喝水 [cite: 2026-02-05]。</div>
+</div>
+
+<div id="dogs" class="content-section">
+    <h3>🐕 9個孩子名單</h3>
+    <p>張布丁、蔡小白、蔡小花、來順、蔡脯、蔡頭貴、哈蜜瓜、有錢、妞妞。</p>
+</div>
+
+<div id="phones" class="content-section">
+    <h3>📞 緊急分機</h3>
+    <p>總機：0 [cite: 2026-02-05]</p>
 </div>
 
 <div class="footer">
-    <div class="quote">「不畏雷劫，唯愛永恆。」</div>
-    <div>2026 修行中 · 柔 陪著妳 ✋✨</div>
+    <div style="font-style: italic;">「不畏雷劫，唯愛永恆。」 [cite: 2026-02-05]</div>
+    <div>小黑哥 ✋✨ 專屬法器</div>
 </div>
+
+<script>
+    function show(id) {
+        let sections = document.getElementsByClassName('content-section');
+        for (let s of sections) s.classList.remove('active');
+        document.getElementById(id).classList.add('active');
+    }
+    function save() {
+        localStorage.setItem('guardNote', document.getElementById('note').value);
+        alert('功德已儲存！ [cite: 2026-02-05]');
+    }
+    window.onload = function() {
+        document.getElementById('note').value = localStorage.getItem('guardNote') || "";
+    }
+</script>
 
 </body>
 </html>
