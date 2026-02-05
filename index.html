@@ -9,13 +9,13 @@
         body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 10px; }
         .header { text-align: center; background: var(--main); color: white; padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); }
         .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .nav-item { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; }
+        .nav-item { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; border: 1px solid #eee; }
         .content-section { display: none; background: white; padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
         .active { display: block; }
         .card { background: #fff9f0; border-left: 5px solid var(--gold); padding: 10px; margin-bottom: 10px; border-radius: 5px; }
         input, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--main); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 5px; }
-        .dog-btn { display: inline-block; padding: 8px; background: #eee; margin: 3px; border-radius: 5px; cursor: pointer; }
+        button { width: 100%; padding: 12px; background: var(--main); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 5px; cursor: pointer; }
+        .dog-btn { display: inline-block; padding: 8px 12px; background: #eee; margin: 3px; border-radius: 5px; cursor: pointer; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -42,78 +42,77 @@
     </div>
     <div class="card" style="margin-top:10px;">
         <strong id="currentDog">請選擇孩子</strong>
-        <textarea id="dogNote" rows="3" placeholder="點小鉛筆修改紀錄..."></textarea>
-        <button onclick="saveDogNote()">✍️ 儲存病歷 [cite: 2026-02-05]</button>
+        <textarea id="dogNote" rows="3" placeholder="點選孩子名字，再用小鉛筆修改紀錄..."></textarea>
+        <button onclick="saveDogNote()">✍️ 儲存病歷紀錄 [cite: 2026-02-05]</button>
     </div>
 </div>
 
 <div id="goal" class="content-section">
-    <h3>📊 薪資與時數小算盤</h3>
+    <h3>📊 薪資時數試算</h3>
     <div class="card">
-        <strong>💰 基本實領預估：$41,021</strong> [cite: 2026-02-05]<br>
-        <small>(含底薪 $33,500 + 資歷加給 $9,300 - 勞健保等 [cite: 2026-02-05])</small>
+        <strong>💰 實領預估：$41,021</strong> [cite: 2026-02-05]<br>
+        <small>(底薪 33.5k + 資歷加給 9.3k [cite: 2026-02-05])</small>
     </div>
     <div class="card">
-        <label>📅 本月已上班天數 (12小時制)：</label>
+        <label>📅 本月已出勤天數 (12小時制)：</label>
         <input type="number" id="workDays" value="0" onchange="calcSalary()">
-        <p>⏱️ 目前總時數：<span id="totalHours">0</span> / 288 小時 [cite: 2026-01-22]</p>
+        <p>⏱️ 目前總時數：<span id="totalHours" style="font-weight:bold; color:blue;">0</span> / 288 小時 [cite: 2026-01-22]</p>
         <p id="alertMsg" style="color:red; font-weight:bold;"></p>
     </div>
 </div>
 
 <div id="medicine" class="content-section">
-    <h3>🌿 中醫藥理精華</h3>
-    <div class="card"><strong>🔴 熱感冒/化痰</strong>：黃痰注意，愛克痰需加水稀釋 [cite: 2026-01-19, 2026-02-05]。</div>
-    <div class="card"><strong>🟢 尊重生命</strong>：眾生平等，萬物有靈 [cite: 2026-02-05]。</div>
+    <h3>🌿 中醫守護心法</h3>
+    <div class="card"><strong>🔴 熱感冒/化痰</strong>：觀察黃痰，愛克痰需加水稀釋 [cite: 2026-01-19, 2026-02-05]。</div>
+    <div class="card"><strong>🟢 尊重生命</strong>：眾生平等，萬物有靈 [cite: 2026-01-16, 2026-02-05]。</div>
 </div>
 
 <div id="diary" class="content-section">
     <h3>🖋️ 每日巡邏日誌</h3>
-    <textarea id="dailyNote" rows="5" placeholder="今天巡邏的心情..."></textarea>
-    <button onclick="saveDaily()">儲存日誌 [cite: 2026-02-05]</button>
-</div>
-
-<div style="text-align:center; margin-top:20px; color:#888; font-size:12px;">
-    「肉體凡胎，修得圓滿。」 [cite: 2026-02-05]
+    <textarea id="dailyNote" rows="5" placeholder="紀錄今日心情與巡邏重點..."></textarea>
+    <button onclick="saveDaily()">儲存今日日誌 [cite: 2026-02-05]</button>
 </div>
 
 <script>
+    // 切換顯示
     function show(id) {
         let sections = document.getElementsByClassName('content-section');
         for (let s of sections) s.classList.remove('active');
         document.getElementById(id).classList.add('active');
     }
 
-    // 狗狗紀錄功能
-    let currentDogName = "";
+    // 狗狗病歷編輯
+    let currentName = "";
     function editDog(name) {
-        currentDogName = name;
+        currentName = name;
         document.getElementById('currentDog').innerText = " sedang 編輯：" + name;
         document.getElementById('dogNote').value = localStorage.getItem('dog_' + name) || "";
     }
     function saveDogNote() {
-        if(!currentDogName) return alert("請先選擇一個孩子！");
-        localStorage.setItem('dog_' + currentDogName, document.getElementById('dogNote').value);
-        alert(currentDogName + " 的功德紀錄已更新！ [cite: 2026-02-05]");
+        if(!currentName) { alert("請先點選孩子名字！"); return; }
+        localStorage.setItem('dog_' + currentName, document.getElementById('dogNote').value);
+        alert(currentName + " 的病歷已存入法器！ [cite: 2026-02-05]");
     }
 
-    // 薪資計算功能
+    // 薪資算盤計算
     function calcSalary() {
         let days = document.getElementById('workDays').value;
         let hours = days * 12; [cite: 2026-01-22]
         document.getElementById('totalHours').innerText = hours;
         if(hours > 288) {
-            document.getElementById('alertMsg').innerText = "⚠️ 警告：已超過上限 288 小時！ [cite: 2026-01-22]";
+            document.getElementById('alertMsg').innerText = "⚠️ 警告：已超過法定 288 小時！ [cite: 2026-01-22]";
         } else {
             document.getElementById('alertMsg').innerText = "";
         }
     }
 
+    // 日誌儲存
     function saveDaily() {
         localStorage.setItem('lastDaily', document.getElementById('dailyNote').value);
-        alert('日誌已存入法器！ [cite: 2026-02-05]');
+        alert('今日日誌已存檔！ [cite: 2026-02-05]');
     }
 
+    // 初始化讀取
     window.onload = function() {
         document.getElementById('dailyNote').value = localStorage.getItem('lastDaily') || "";
         calcSalary();
