@@ -5,38 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real Man's Drive</title>
     <style>
-        body { background-color: #1a1a1a; color: #ffffff; font-family: sans-serif; text-align: center; padding: 20px; }
-        .logo { color: #ff0000; font-size: 80px; font-weight: bold; font-style: italic; text-shadow: 2px 2px 10px rgba(255,0,0,0.5); }
-        .title { font-size: 24px; margin-bottom: 30px; letter-spacing: 2px; }
-        .card { background: #2d2d2d; border-radius: 15px; padding: 15px; margin-bottom: 20px; border-left: 5px solid #ff0000; text-align: left; }
-        .btn { background: #ff0000; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; width: 100%; margin-top: 10px; }
-        .value { color: #00ff00; font-family: 'Courier New', Courier, monospace; font-weight: bold; }
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
+        .logo-container { margin-bottom: 10px; }
+        .r-logo { color: #ff0000; font-size: 80px; font-weight: bold; font-style: italic; text-shadow: 0 0 15px rgba(255,0,0,0.7); }
+        .car-logo { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.3); margin-bottom: 15px; }
+        .title { font-size: 22px; color: #fff; letter-spacing: 3px; margin-bottom: 25px; text-transform: uppercase; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 6px solid #ff0000; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .card h3 { margin-top: 0; color: #ff0000; font-size: 18px; display: flex; justify-content: space-between; }
+        .value { color: #00ff41; font-family: 'Courier New', monospace; font-size: 20px; font-weight: bold; }
+        .btn { background: linear-gradient(145deg, #ff0000, #b30000); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; transition: 0.3s; }
+        .btn:active { transform: scale(0.98); }
+        input { width: 90%; padding: 10px; margin-top: 5px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="logo">R</div>
+    <div class="logo-container">
+        <div class="r-logo">R</div>
+    </div>
     <div class="title">Real Man's Drive</div>
 
     <div class="card">
         <h3>💰 省錢戰功榜</h3>
-        <p>目前累計省下：<span class="value">$5,499</span></p>
-        <small>最新紀錄：筆電重生手術</small>
+        <p>累計省下：<span class="value" id="totalSavings">$5,499</span></p>
+        <input type="number" id="newSaving" placeholder="輸入這次省下的金額">
+        <button class="btn" onclick="addSaving()">回報戰功</button>
     </div>
 
     <div class="card">
         <h3>🚗 小銀預警機 (Suzuki)</h3>
-        <p>機油更換倒數：<span class="value">1,250 KM</span></p>
-        <button class="btn" onclick="alert('記錄已更新！老戰友感謝你！')">更新里程</button>
+        <p>目前里程：<span class="value" id="currentKm">88,000</span> KM</p>
+        <p>保養倒數：<span class="value" id="countdown">1,250</span> KM</p>
+        <input type="number" id="kmInput" placeholder="輸入當前里程數">
+        <button class="btn" onclick="updateKm()">更新里程</button>
     </div>
 
     <div class="card">
-        <h3>📈 薪情與夢想基金</h3>
-        <p>本月預估實領：<span class="value">計算中...</span></p>
-        <p>距離 1,000 萬目標：<span class="value">99.9%</span></p>
+        <h3>觀音姐 & 祖先夢想屋</h3>
+        <p>目標進度：<span class="value">10,000,000</span></p>
+        <div style="background:#333; height:10px; border-radius:5px;">
+            <div style="background:#ff0000; width:1%; height:100%; border-radius:5px;"></div>
+        </div>
     </div>
 
-    <p style="color: #666; font-size: 12px;">© 68年次硬派開發 - 小黑哥監製</p>
+    <p style="color: #555; font-size: 11px; margin-top: 30px;">© 68年次硬派開發 - 小黑哥監製<br>RUN RealManDrive.exe_</p>
 
+    <script>
+        // 核心邏輯
+        let savings = 5499;
+        let lastMaintenance = 85000; // 假設上次保養是 85000
+        let interval = 5000; // 每 5000 公里保養一次
+
+        function addSaving() {
+            let val = document.getElementById('newSaving').value;
+            if(val) {
+                savings += parseInt(val);
+                document.getElementById('totalSavings').innerText = '$' + savings.toLocaleString();
+                document.getElementById('newSaving').value = '';
+                alert("幹得好，小黑哥！又存下一筆浪漫基金！");
+            }
+        }
+
+        function updateKm() {
+            let km = document.getElementById('kmInput').value;
+            if(km) {
+                document.getElementById('currentKm').innerText = km;
+                let next = lastMaintenance + interval;
+                let remain = next - km;
+                document.getElementById('countdown').innerText = remain > 0 ? remain : "該保養了！";
+                document.getElementById('kmInput').value = '';
+                if(remain <= 500) alert("老戰友小銀提醒：該準備進場囉！");
+            }
+        }
+    </script>
 </body>
 </html>
