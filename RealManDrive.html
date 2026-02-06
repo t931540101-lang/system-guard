@@ -3,25 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Man's Drive Pro</title>
+    <title>Real Man's Drive Ultimate</title>
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; text-align: center; padding: 20px; margin: 0; }
         .r-logo { color: #ff0000; font-size: 80px; font-weight: bold; font-style: italic; text-shadow: 0 0 15px rgba(255,0,0,0.7); margin-top: 20px; }
-        .title-input { background: transparent; border: none; color: #fff; font-size: 22px; font-weight: bold; text-align: center; width: 100%; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #333; }
+        
+        /* 更改愛車名字的輸入框樣式 */
+        .title-input { background: transparent; border: none; color: #fff; font-size: 24px; font-weight: bold; text-align: center; width: 100%; letter-spacing: 2px; text-transform: uppercase; margin: 15px 0; border-bottom: 1px dashed #444; outline: none; }
+        .title-input:focus { border-bottom: 1px solid #ff0000; color: #ff0000; }
+
         .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 6px solid #ff0000; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .card h3 { margin: 0 0 15px 0; color: #ff0000; font-size: 18px; }
         .value { color: #00ff41; font-family: 'Courier New', monospace; font-size: 20px; font-weight: bold; }
         .btn { background: linear-gradient(145deg, #ff0000, #b30000); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 15px; cursor: pointer; }
-        input[type="number"] { width: calc(100% - 24px); padding: 10px; margin-top: 5px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; }
-        #preview { width: 100%; border-radius: 8px; margin-top: 10px; display: none; border: 1px solid #ff0000; }
-        .footer { color: #555; font-size: 11px; margin-top: 30px; }
+        input[type="number"] { width: calc(100% - 24px); padding: 10px; margin-top: 5px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; outline: none; }
+        
+        #preview { width: 100%; border-radius: 8px; margin-top: 15px; display: none; border: 2px solid #ff0000; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
+        .footer { color: #555; font-size: 11px; margin-top: 30px; line-height: 1.5; }
     </style>
 </head>
 <body>
 
     <div class="r-logo">R</div>
     
-    <input type="text" class="title-input" id="carTitle" value="REAL MAN'S DRIVE" onchange="console.log('Name saved')">
+    <input type="text" class="title-input" id="carTitle" value="REAL MAN'S DRIVE" placeholder="點擊輸入愛車暱稱">
 
     <div class="card">
         <h3>📸 戰功紀錄與相機</h3>
@@ -29,8 +34,9 @@
         <input type="number" id="in_save" placeholder="輸入省下的金額">
         
         <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;" onchange="previewImage(event)">
-        <button class="btn" style="background: #444;" onclick="document.getElementById('cameraInput').click()">📷 拍下零件或戰利品</button>
-        <img id="preview" src="" alt="預覽圖">
+        <button class="btn" style="background: #444;" onclick="document.getElementById('cameraInput').click()">📷 拍攝戰利品/零件</button>
+        
+        <img id="preview" src="" alt="維修實錄預覽">
         
         <button class="btn" onclick="saveMoney()">回報戰功</button>
     </div>
@@ -38,33 +44,37 @@
     <div class="card">
         <h3>🚗 小銀預警機 (Suzuki)</h3>
         <p>保養倒數：<span class="value" id="disp_count">1,250</span> KM</p>
-        <input type="number" id="in_km" placeholder="更新目前里程數">
+        <input type="number" id="in_km" placeholder="更新目前總里程數">
         <button class="btn" onclick="updateKm()">更新數據</button>
     </div>
 
     <div class="footer">
         © 68年次硬派開發 - 小黑哥監製<br>
+        SYSTEM STATUS: ONLINE<br>
         RUN RealManDrive.exe_
     </div>
 
     <script>
         let totalSave = 5499;
+
         function saveMoney() {
             let v = document.getElementById('in_save').value;
             if(v) {
                 totalSave += parseInt(v);
                 document.getElementById('disp_save').innerText = '$' + totalSave.toLocaleString();
                 document.getElementById('in_save').value = '';
-                alert("省得漂亮！照片已上傳（預覽）！");
+                alert("回報成功！這筆錢離夢想屋又近了一步！");
             }
         }
 
         function updateKm() {
             let k = document.getElementById('in_km').value;
             if(k) {
+                // 以 85000 + 5000 為保養基準
                 let remain = (85000 + 5000) - k;
-                document.getElementById('disp_count').innerText = remain > 0 ? remain.toLocaleString() : "該保養了！";
+                document.getElementById('disp_count').innerText = (remain > 0 ? remain.toLocaleString() : "該保養了！");
                 document.getElementById('in_km').value = '';
+                if(remain <= 500) alert("老戰友小銀提醒：該準備進場囉！");
             }
         }
 
