@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>甜蜜家園 - 家庭財務生存導航</title>
+    <style>
+        :root { --pink: #ff7675; --blue: #74b9ff; --green: #55efc4; --main: #2d3436; --bg: #fff5f5; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-top: 8px solid var(--pink); }
+        h2 { text-align: center; color: var(--main); margin-bottom: 20px; }
+        .section-title { background: #ffeaa7; padding: 10px; border-radius: 8px; font-weight: bold; margin: 20px 0 10px 0; color: #d35400; }
+        .input-group { margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+        label { font-size: 14px; flex: 1; font-weight: bold; }
+        input { width: 55%; padding: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; text-align: right; background: #fafafa; }
+        .btn-calc { width: 100%; padding: 15px; background: var(--pink); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-calc:active { transform: scale(0.98); }
+        .result-box { margin-top: 20px; padding: 20px; border-radius: 15px; text-align: center; display: none; border: 2px dashed var(--pink); }
+        .balance-amount { font-size: 36px; font-weight: bold; color: var(--pink); margin: 10px 0; }
+        .footer { text-align: center; margin-top: 30px; color: #b2bec3; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏠 甜蜜家園理財 v1.0</h2>
+    
+    <div class="section-title">💰 家庭總收入</div>
+    <div class="input-group">
+        <label>本月家庭總進帳：</label>
+        <input type="number" id="homeIncome" value="60000" placeholder="薪資或公積金">
+    </div>
+
+    <div class="section-title">🥗 每日菜錢與伙食</div>
+    <div class="input-group">
+        <label>今日菜錢/超市：</label>
+        <input type="number" id="dailyFood" value="0">
+    </div>
+    <div class="input-group">
+        <label>外食/飲品開銷：</label>
+        <input type="number" id="extraFood" value="0">
+    </div>
+
+    <div class="section-title">💡 每月固定開銷</div>
+    <div class="input-group">
+        <label>水電瓦斯(分攤)：</label>
+        <input type="number" id="utilities" value="0" class="expense">
+    </div>
+    <div class="input-group">
+        <label>房貸 / 房租：</label>
+        <input type="number" id="rent" value="0" class="expense">
+    </div>
+    <div class="input-group">
+        <label>雜項(學費/日用)：</label>
+        <input type="number" id="others" value="0" class="expense">
+    </div>
+
+    <button class="btn-calc" onclick="calculateHome()">💖 一鍵計算結餘</button>
+
+    <div id="homeResult" class="result-box">
+        <div style="font-size: 14px; color: #636e72;">辛苦了！家裡目前還剩餘</div>
+        <div id="homeBalance" class="balance-amount">$0</div>
+        <div id="homeMsg" style="font-weight:bold; color: #2d3436; font-size: 15px;"></div>
+    </div>
+
+    <div class="footer">
+        「精打細算，是為了給家人更好的未來。」 [cite: 2026-02-06]
+    </div>
+</div>
+
+<script>
+    function calculateHome() {
+        const income = parseFloat(document.getElementById('homeIncome').value) || 0;
+        const food = (parseFloat(document.getElementById('dailyFood').value) || 0) + 
+                     (parseFloat(document.getElementById('extraFood').value) || 0);
+        
+        let fixedExpense = 0;
+        document.querySelectorAll('.expense').forEach(item => {
+            fixedExpense += parseFloat(item.value) || 0;
+        });
+
+        const totalBalance = income - food - fixedExpense;
+        
+        const resultDiv = document.getElementById('homeResult');
+        resultDiv.style.display = 'block';
+        document.getElementById('homeBalance').innerText = '$' + totalBalance.toLocaleString();
+
+        const msg = document.getElementById('homeMsg');
+        if (totalBalance > (income * 0.2)) {
+            msg.innerText = "✨ 持家有道！這個月能多存一點夢想基金囉！";
+        } else if (totalBalance >= 0) {
+            msg.innerText = "🍃 運作良好，平穩守護著家。";
+        } else {
+            msg.innerText = "⚠️ 注意囉！支出有點多，該啟動省錢模式了。";
+        }
+    }
+</script>
+
+</body>
+</html>
