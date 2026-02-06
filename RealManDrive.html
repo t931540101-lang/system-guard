@@ -1,23 +1,89 @@
-<div class="logo-container">
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Man's Drive</title>
+    <style>
+        body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; text-align: center; padding: 20px; margin: 0; }
+        .logo-container { padding-top: 20px; }
+        .r-logo { color: #ff0000; font-size: 80px; font-weight: bold; font-style: italic; text-shadow: 0 0 15px rgba(255,0,0,0.7); line-height: 1; }
+        .title { font-size: 22px; color: #fff; letter-spacing: 3px; margin: 20px 0; text-transform: uppercase; font-weight: bold; cursor: pointer; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 6px solid #ff0000; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .card h3 { margin: 0 0 15px 0; color: #ff0000; font-size: 18px; }
+        .value { color: #00ff41; font-family: 'Courier New', monospace; font-size: 20px; font-weight: bold; }
+        .btn { background: linear-gradient(145deg, #ff0000, #b30000); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 15px; cursor: pointer; }
+        input { width: calc(100% - 24px); padding: 10px; margin-top: 5px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; }
+        .footer { color: #555; font-size: 11px; margin-top: 30px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
         <div class="r-logo">R</div>
     </div>
-    <div class="title" id="carDisplayName" onclick="changeCarName()" style="cursor: pointer;">
-        Real Man's Drive
+    
+    <div class="title" id="carName" onclick="editName()">REAL MAN'S DRIVE</div>
+    <div style="color:#666; font-size:12px; margin-top:-15px; margin-bottom:20px;">(點擊名稱可修改)</div>
+
+    <div class="card">
+        <h3>💰 省錢戰功榜</h3>
+        <p>目前累計省下：<span class="value" id="disp_save">$5,499</span></p>
+        <input type="number" id="in_save" placeholder="輸入省下的金額">
+        <button class="btn" onclick="saveMoney()">回報戰功</button>
     </div>
-    <div style="font-size: 14px; color: #888; margin-top: -20px; margin-bottom: 20px;">(點擊上方文字更改愛車名稱)</div>
+
+    <div class="card">
+        <h3>🚗 小銀預警機 (Suzuki)</h3>
+        <p>目前里程：<span class="value" id="disp_km">88,000</span> KM</p>
+        <p>保養倒數：<span class="value" id="disp_count">1,250</span> KM</p>
+        <input type="number" id="in_km" placeholder="輸入當前里程數">
+        <button class="btn" onclick="updateKm()">更新里程</button>
+    </div>
+
+    <div class="card">
+        <h3>觀音姐 & 祖先夢想屋</h3>
+        <p>目標進度：<span class="value">10,000,000</span></p>
+        <div style="background:#333; height:10px; border-radius:5px; margin-top:10px;">
+            <div style="background:#ff0000; width:1%; height:100%; border-radius:5px;"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 68年次硬派開發 - 小黑哥監製<br>
+        RUN RealManDrive.exe_
+    </div>
 
     <script>
-        // 核心邏輯補強
-        let carName = "Real Man's Drive";
+        let totalSave = 5499;
+        let lastMaintenance = 85000;
+        let maintenanceInterval = 5000;
 
-        function changeCarName() {
-            let newName = prompt("請輸入您的愛車新名稱：", carName);
-            if (newName != null && newName != "") {
-                carName = newName;
-                document.getElementById('carDisplayName').innerText = carName;
-                alert("命名成功！現在這台車叫：" + carName);
+        function editName() {
+            let n = prompt("請輸入您的愛車名稱：", document.getElementById('carName').innerText);
+            if(n) document.getElementById('carName').innerText = n.toUpperCase();
+        }
+
+        function saveMoney() {
+            let v = document.getElementById('in_save').value;
+            if(v) {
+                totalSave += parseInt(v);
+                document.getElementById('disp_save').innerText = '$' + totalSave.toLocaleString();
+                document.getElementById('in_save').value = '';
+                alert("省得漂亮！浪漫基金持續增加！");
             }
         }
-        
-        // 原本的 addSaving 和 updateKm 函數維持在下面 ...
+
+        function updateKm() {
+            let k = document.getElementById('in_km').value;
+            if(k) {
+                document.getElementById('disp_km').innerText = parseInt(k).toLocaleString();
+                let remain = (lastMaintenance + maintenanceInterval) - k;
+                document.getElementById('disp_count').innerText = remain > 0 ? remain.toLocaleString() : "該保養了！";
+                document.getElementById('in_km').value = '';
+                if(remain <= 500) alert("提醒：老戰友需要照顧囉！");
+            }
+        }
     </script>
+</body>
+</html>
