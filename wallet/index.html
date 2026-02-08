@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圓夢記帳本-小鉛筆版</title>
+    <title>圓夢記帳本-相機進階版</title>
     <style>
         body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; color: #333; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        h2 { color: #2c3e50; font-size: 1.2rem; border-left: 5px solid #2980b9; padding-left: 10px; margin-top: 0; }
-        .input-group { margin: 10px 0; }
+        h2 { color: #2c3e50; font-size: 1.1rem; border-left: 5px solid #2980b9; padding-left: 10px; margin: 0 0 10px 0; }
+        .input-group { margin: 8px 0; }
         input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
-        .fixed-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 15px; }
-        .pencil-btn { background: none; border: none; color: #2980b9; cursor: pointer; font-size: 18px; width: auto; padding: 0 5px; display: inline; }
+        .btn-row { display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        .cam-btn { background-color: #3498db; }
+        .fixed-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 14px; }
+        #preview { width: 100%; margin-top: 10px; border-radius: 8px; display: none; }
         .result { font-size: 26px; font-weight: bold; color: #e74c3c; text-align: center; background: #fff5f5; padding: 10px; border-radius: 8px; }
     </style>
 </head>
@@ -20,32 +22,28 @@
 
     <div class="card">
         <h2>💰 1. 薪資水源頭</h2>
-        <div class="input-group">
-            <input type="number" id="salaryInput" placeholder="請輸入實領薪資" oninput="calculateBalance()">
-        </div>
+        <input type="number" id="salaryInput" placeholder="請輸入本月實領薪資" oninput="calculateBalance()">
     </div>
 
     <div class="card">
-        <h2>固定支出 (點鉛筆修改 ✏️)</h2>
-        <div class="fixed-item">
-            <span>🐾 孩子預備金: $<span id="val1">3000</span></span>
-            <button class="pencil-btn" onclick="editFixed('val1', '孩子預備金')">✏️</button>
-        </div>
-        <div class="fixed-item">
-            <span>🚗 小銀養車金: $<span id="val2">2000</span></span>
-            <button class="pencil-btn" onclick="editFixed('val2', '小銀養車金')">✏️</button>
-        </div>
-        <div class="fixed-item">
-            <span>🏠 生活雜支費: $<span id="val3">10000</span></span>
-            <button class="pencil-btn" onclick="editFixed('val3', '生活雜支費')">✏️</button>
-        </div>
+        <h2>固定支出 (點 ✏️ 修改)</h2>
+        <div class="fixed-item"><span>🐾 孩子預備金: $<span id="val1">3000</span></span><button onclick="editFixed('val1', '孩子預備金')" style="border:none; background:none; color:#2980b9;">✏️</button></div>
+        <div class="fixed-item"><span>🚗 小銀養車金: $<span id="val2">2000</span></span><button onclick="editFixed('val2', '小銀養車金')" style="border:none; background:none; color:#2980b9;">✏️</button></div>
+        <div class="fixed-item"><span>🏠 生活雜支費: $<span id="val3">10000</span></span><button onclick="editFixed('val3', '生活雜支費')" style="border:none; background:none; color:#2980b9;">✏️</button></div>
     </div>
 
     <div class="card">
-        <h2>🧾 2. 發票/小帳輸入</h2>
-        <div class="input-group"><input type="text" id="itemName" placeholder="項目 (例如: 買麵)"></div>
+        <h2>🧾 2. 發票/小帳 (拍照/記帳)</h2>
+        <div class="input-group"><input type="text" id="itemName" placeholder="項目 (例如: 加油)"></div>
         <div class="input-group"><input type="number" id="itemPrice" placeholder="金額"></div>
-        <button onclick="addExpense()">確認扣款</button>
+        
+        <input type="file" id="camFile" accept="image/*" capture="camera" style="display: none;" onchange="showPreview(this)">
+        
+        <div class="btn-row">
+            <button class="cam-btn" onclick="document.getElementById('camFile').click()">📸 拍照</button>
+            <button onclick="addExpense()">💰 確認扣款</button>
+        </div>
+        <img id="preview" alt="發票預覽">
     </div>
 
     <div class="card">
@@ -64,12 +62,23 @@
             }
         }
 
+        function showPreview(input) {
+            const preview = document.getElementById('preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         function calculateBalance() {
             let salary = parseFloat(document.getElementById('salaryInput').value) || 0;
             let f1 = parseFloat(document.getElementById('val1').innerText) || 0;
             let f2 = parseFloat(document.getElementById('val2').innerText) || 0;
             let f3 = parseFloat(document.getElementById('val3').innerText) || 0;
-            
             let balance = salary - (f1 + f2 + f3) - currentExpenses;
             document.getElementById('totalBalance').innerText = '$ ' + balance.toLocaleString();
         }
@@ -80,8 +89,9 @@
                 currentExpenses += price;
                 document.getElementById('itemPrice').value = '';
                 document.getElementById('itemName').value = '';
+                document.getElementById('preview').style.display = 'none';
                 calculateBalance();
-                alert('扣款成功！');
+                alert('扣款成功！影像已記錄。');
             }
         }
     </script>
