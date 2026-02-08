@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小黑哥-圓夢理財本</title>
+    <title>圓夢記帳本-小鉛筆版</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; color: #333; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h2 { color: #2c3e50; border-left: 5px solid #2980b9; padding-left: 10px; }
-        .input-group { margin: 15px 0; }
-        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; color: #333; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        h2 { color: #2c3e50; font-size: 1.2rem; border-left: 5px solid #2980b9; padding-left: 10px; margin-top: 0; }
+        .input-group { margin: 10px 0; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
-        .result { font-size: 24px; font-weight: bold; color: #e74c3c; text-align: center; }
-        .item-list { font-size: 14px; color: #666; }
+        .fixed-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 15px; }
+        .pencil-btn { background: none; border: none; color: #2980b9; cursor: pointer; font-size: 18px; width: auto; padding: 0 5px; display: inline; }
+        .result { font-size: 26px; font-weight: bold; color: #e74c3c; text-align: center; background: #fff5f5; padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -20,28 +21,30 @@
     <div class="card">
         <h2>💰 1. 薪資水源頭</h2>
         <div class="input-group">
-            <label>請輸入本月實領薪資 (由薪資小幫手帶入)：</label>
-            <input type="number" id="salaryInput" placeholder="例如: 45000" oninput="calculateBalance()">
+            <input type="number" id="salaryInput" placeholder="請輸入實領薪資" oninput="calculateBalance()">
         </div>
     </div>
 
     <div class="card">
-        <h2>固定支出 (自動預扣)</h2>
-        <div class="item-list" id="fixedEx">
-            <p>🐾 9 個孩子預備金：$3,000</p>
-            <p>🚗 小銀弟養車基金：$2,000</p>
-            <p>🏠 生活雜支預扣：$10,000</p>
+        <h2>固定支出 (點鉛筆修改 ✏️)</h2>
+        <div class="fixed-item">
+            <span>🐾 孩子預備金: $<span id="val1">3000</span></span>
+            <button class="pencil-btn" onclick="editFixed('val1', '孩子預備金')">✏️</button>
+        </div>
+        <div class="fixed-item">
+            <span>🚗 小銀養車金: $<span id="val2">2000</span></span>
+            <button class="pencil-btn" onclick="editFixed('val2', '小銀養車金')">✏️</button>
+        </div>
+        <div class="fixed-item">
+            <span>🏠 生活雜支費: $<span id="val3">10000</span></span>
+            <button class="pencil-btn" onclick="editFixed('val3', '生活雜支費')">✏️</button>
         </div>
     </div>
 
     <div class="card">
         <h2>🧾 2. 發票/小帳輸入</h2>
-        <div class="input-group">
-            <input type="text" id="itemName" placeholder="項目 (例如: 買麵, 加油)">
-        </div>
-        <div class="input-group">
-            <input type="number" id="itemPrice" placeholder="金額">
-        </div>
+        <div class="input-group"><input type="text" id="itemName" placeholder="項目 (例如: 買麵)"></div>
+        <div class="input-group"><input type="number" id="itemPrice" placeholder="金額"></div>
         <button onclick="addExpense()">確認扣款</button>
     </div>
 
@@ -51,12 +54,23 @@
     </div>
 
     <script>
-        let fixedTotal = 15000; // 這是預設的固定支出總和
-        let currentExpenses = 0; // 這是累計的發票金額
+        let currentExpenses = 0;
+
+        function editFixed(id, name) {
+            let newVal = prompt("請輸入新的「" + name + "」金額：", document.getElementById(id).innerText);
+            if (newVal !== null && !isNaN(newVal)) {
+                document.getElementById(id).innerText = newVal;
+                calculateBalance();
+            }
+        }
 
         function calculateBalance() {
-            let salary = document.getElementById('salaryInput').value || 0;
-            let balance = salary - fixedTotal - currentExpenses;
+            let salary = parseFloat(document.getElementById('salaryInput').value) || 0;
+            let f1 = parseFloat(document.getElementById('val1').innerText) || 0;
+            let f2 = parseFloat(document.getElementById('val2').innerText) || 0;
+            let f3 = parseFloat(document.getElementById('val3').innerText) || 0;
+            
+            let balance = salary - (f1 + f2 + f3) - currentExpenses;
             document.getElementById('totalBalance').innerText = '$ ' + balance.toLocaleString();
         }
 
@@ -67,7 +81,7 @@
                 document.getElementById('itemPrice').value = '';
                 document.getElementById('itemName').value = '';
                 calculateBalance();
-                alert('扣款成功！記得要把發票收好喔！');
+                alert('扣款成功！');
             }
         }
     </script>
