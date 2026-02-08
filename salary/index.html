@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薪資生活小幫手 - 專業薪資管理</title>
+    <style>
+        :root { --main: #2c3e50; --gold: #d4af37; --green: #27ae60; --bg: #f4f7f6; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 5px solid var(--gold); }
+        h2 { text-align: center; color: var(--main); margin-bottom: 20px; }
+        .section-title { background: #eee; padding: 8px; border-radius: 5px; font-weight: bold; margin: 15px 0 10px 0; color: var(--main); }
+        .input-group { margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+        label { font-size: 14px; flex: 1; }
+        input { width: 60%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; text-align: right; }
+        .btn { width: 100%; padding: 15px; background: var(--main); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-save { background: var(--gold); margin-top: 10px; }
+        .result-box { margin-top: 20px; padding: 15px; border-radius: 12px; text-align: center; display: none; }
+        .total-income { color: var(--green); font-size: 18px; font-weight: bold; }
+        .balance-amount { font-size: 28px; font-weight: bold; margin: 5px 0; }
+        .history-section { margin-top: 30px; border-top: 2px solid #eee; padding-top: 15px; }
+        .history-item { background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📊 薪資生活小幫手</h2>
+    
+    <div class="section-title">💰 收入項目</div>
+    <div class="input-group"><label>月份：</label><input type="month" id="workMonth"></div>
+    <div class="input-group"><label>實領底薪+加給：</label><input type="number" id="baseSalary" value="41021"></div>
+    <div class="input-group"><label>加班/獎金：</label><input type="number" id="bonus" value="0"></div>
+
+    <div class="section-title">💸 支出項目</div>
+    <div class="input-group"><label>房貸 / 房租：</label><input type="number" id="house" value="0" class="expense"></div>
+    <div class="input-group"><label>車貸 / 交通：</label><input type="number" id="car" value="0" class="expense"></div>
+    <div class="input-group"><label>生活固定開銷：</label><input type="number" id="living" value="10000" class="expense"></div>
+
+    <button class="btn" onclick="calculate()">🚀 結算本月餘額</button>
+
+    <div id="result" class="result-box" style="background: #e8f5e9; border: 1px solid var(--green);">
+        <div class="total-income">總收入預估：$<span id="showIncome">0</span></div>
+        <div style="font-size: 14px; color: #666; margin-top: 8px;">扣除支出後剩餘 (可儲存金額)</div>
+        <div id="finalBalance" class="balance-amount" style="color: var(--green);">$0</div>
+        <div id="message" style="font-weight:bold; font-size: 14px; color: #2c3e50;">✨ 已達成財務平衡，儲蓄目標進度增加中。</div>
+        <button class="btn btn-save" onclick="saveToHistory()">💾 儲存至歷史紀錄</button>
+    </div>
+
+    <div class="history-section">
+        <div class="section-title">📜 歷史儲蓄紀錄</div>
+        <div id="historyList"></div>
+        <button onclick="clearHistory()" style="background:none; border:none; color:#888; font-size:12px; cursor:pointer; width:100%; margin-top:10px;">清空紀錄</button>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const base = parseFloat(document.getElementById('baseSalary').value) || 0;
+        const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+        const totalIncome = base + bonus;
+
+        let totalExpense = 0;
+        document.querySelectorAll('.expense').forEach(item => {
+            totalExpense += parseFloat(item.value) || 0;
+        });
+
+        const balance = totalIncome - totalExpense;
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('showIncome').innerText = totalIncome.toLocaleString();
+        document.getElementById('finalBalance').innerText = '$' + balance.toLocaleString();
+    }
+
+    function saveToHistory() {
+        const month = document.getElementById('workMonth').value || "未指定";
+        const balance = document.getElementById('finalBalance').innerText;
+        const history = JSON.parse(localStorage.getItem('salaryHistory') || "[]");
+        
+        history.unshift({ month, balance }); // 新紀錄排在前面
+        localStorage.setItem('salaryHistory', JSON.stringify(history));
+        displayHistory();
+        alert(month + " 紀錄已存檔！");
+    }
+
+    function displayHistory() {
+        const history = JSON.parse(localStorage.getItem('salaryHistory') || "[]");
+        const list = document.getElementById('historyList');
+        list.innerHTML = history.map(item => `
+            <div class="history-item">
+                <span>📅 ${item.month}</span>
+                <span style="font-weight:bold; color:var(--green);">${item.balance}</span>
+            </div>
+        `).join('');
+    }
+
+    function clearHistory() {
+        if(confirm("確定要清空所有紀錄嗎？")) {
+            localStorage.removeItem('salaryHistory');
+            displayHistory();
+        }
+    }
+
+    window.onload = function() {
+        // 設定預設月份
+        const now = new Date();
+        document.getElementById('workMonth').value = now.toISOString().substring(0, 7);
+        displayHistory();
+    }
+</script>
+
+</body>
+</html>
