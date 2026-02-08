@@ -1,25 +1,21 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Man's Drive</title>
+    <title>Real Man's Drive - HP Edition</title>
     <style>
         body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; text-align: center; padding: 20px; margin: 0; }
-        .r-logo { color: #ff0000; font-size: 80px; font-weight: bold; font-style: italic; text-shadow: 0 0 15px rgba(255,0,0,0.7); margin-top: 20px; }
-        .title-input { background: transparent; border: none; color: #fff; font-size: 24px; font-weight: bold; text-align: center; width: 100%; letter-spacing: 2px; text-transform: uppercase; margin: 15px 0; border-bottom: 1px dashed #444; outline: none; }
-        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 6px solid #ff0000; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        /* 預警機小標題的輸入框樣式 */
-        .card-title-input { background: transparent; border: none; color: #ff0000; font-size: 18px; font-weight: bold; width: 100%; outline: none; margin-bottom: 10px; border-bottom: 1px solid transparent; }
-        .card-title-input:focus { border-bottom: 1px solid #ff0000; }
-        .value { color: #00ff41; font-family: 'Courier New', monospace; font-size: 20px; font-weight: bold; }
-        .btn { background: linear-gradient(145deg, #ff0000, #b30000); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 15px; cursor: pointer; }
-        input[type="number"] { width: calc(100% - 24px); padding: 10px; margin-top: 5px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; outline: none; }
-        #preview { width: 100%; border-radius: 8px; margin-top: 15px; display: none; border: 2px solid #ff0000; }
+        .r-logo { color: #ff0000; font-size: 80px; font-weight: bold; font-style: italic; text-shadow: 0 0 15px rgba(255,0,0,0.7); margin-top: 10px; }
+        .title-input { background: transparent; border: none; color: #fff; font-size: 22px; font-weight: bold; text-align: center; width: 100%; border-bottom: 1px dashed #444; outline: none; margin-bottom: 15px; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 15px; margin-bottom: 15px; border-left: 6px solid #ff0000; text-align: left; }
+        .card-title-input { background: transparent; border: none; color: #ff0000; font-size: 18px; font-weight: bold; width: 100%; outline: none; margin-bottom: 8px; }
+        .value { color: #00ff41; font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold; }
+        .btn { background: linear-gradient(145deg, #ff0000, #b30000); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
+        input[type="number"] { width: calc(100% - 24px); padding: 10px; margin-top: 5px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; }
         .progress-bg { background:#333; height:12px; border-radius:6px; margin-top:10px; overflow:hidden; }
         #progress-bar { background:#ff0000; width:0%; height:100%; transition: 0.5s; }
-        .footer { color: #555; font-size: 11px; margin-top: 30px; }
+        .footer { color: #555; font-size: 11px; margin-top: 20px; }
     </style>
 </head>
 <body onload="loadData()">
@@ -28,70 +24,59 @@
     <input type="text" class="title-input" id="carTitle" value="小銀的專屬浪漫" onchange="saveAll()">
 
     <div class="card">
-        <h3>💰 目前省下的金額</h3>
-        <p>目前累計省下：<span class="value" id="disp_save">$0</span></p>
-        <input type="number" id="in_save" placeholder="輸入省下的金額">
-        <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;" onchange="previewImage(event)">
-        <button class="btn" style="background: #444;" onclick="document.getElementById('cameraInput').click()">📷 拍攝戰利品/零件</button>
-        <img id="preview" src="" alt="維修預覽">
-        <button class="btn" onclick="saveMoney()">回報戰功</button>
-    </div>
-
-    <div class="card">
-        <input type="text" class="card-title-input" id="carSubName" value="🚗 小銀預警機 (Suzuki)" onchange="saveAll()">
-        <p>保養倒數：<span class="value" id="disp_count">5,000</span> KM</p>
+        <input type="text" class="card-title-input" id="carSubName" value="🚗 小銀弟的里程路" onchange="saveAll()">
+        <p>機油倒數：<span class="value" id="disp_count">5,000</span> KM</p>
+        <p>輪胎調位：<span class="value" id="disp_tire">10,000</span> KM</p>
+        <p>電瓶預警：<span class="value" id="disp_battery">24</span> 個月</p>
         <input type="number" id="in_km" placeholder="更新目前總里程數">
-        <button class="btn" onclick="updateKm()">更新數據</button>
+        <button class="btn" onclick="updateKm()">更新數據並檢查健康</button>
     </div>
 
     <div class="card">
-        <div class="card">
-    <input type="text" class="card-title-input" id="dreamTitle" value="🏆 男人夢想實現場" onchange="saveAll()" style="color: #ff0000;">
-    
-    <p>目標金額：<span class="value">$10,000,000</span></p>
-    <p>目前基金：<span class="value" id="disp_fund">$0</span></p>
-    <div class="progress-bg"><div id="progress-bar"></div></div>
-</div>
+        <input type="text" class="card-title-input" id="dreamTitle" value="🏆 男人夢想實現場" onchange="saveAll()">
+        <p>目前基金：<span class="value" id="disp_fund">$0</span></p>
+        <input type="number" id="in_save" placeholder="輸入省下的金額">
+        <button class="btn" onclick="saveMoney()">回報戰功</button>
+        <div class="progress-bg"><div id="progress-bar"></div></div>
+    </div>
 
+    <div class="footer">© 68年次硬派開發 - HP Laptop Edition</div>
 
-    <div class="footer">© 68年次硬派開發 - 小黑哥監製<br>FULL CUSTOMIZATION ENABLED_</div>
+    <audio id="engineSound" src="https://www.soundjay.com/mechanical/sounds/car-accelerating-1.mp3"></audio>
+    <audio id="coinSound" src="https://www.soundjay.com/button/sounds/button-3.mp3"></audio>
 
     <script>
-        let data = { save: 5499, km: 85000, title: "小銀的專屬浪漫", subName: "🚗 小銀預警機 (Suzuki)" };
+        let data = { save: 10599, km: 85000, title: "小銀的專屬浪漫", subName: "🚗 小銀弟的里程路", dreamTitle: "🏆 男人夢想實現場" };
         const target = 10000000;
 
         function loadData() {
-            const saved = localStorage.getItem('RMD_DATA');
+            const saved = localStorage.getItem('RMD_DATA_PRO');
             if(saved) data = JSON.parse(saved);
             document.getElementById('carTitle').value = data.title;
             document.getElementById('carSubName').value = data.subName;
+            document.getElementById('dreamTitle').value = data.dreamTitle;
             refreshUI();
         }
 
         function saveAll() {
             data.title = document.getElementById('carTitle').value;
             data.subName = document.getElementById('carSubName').value;
-            localStorage.setItem('RMD_DATA', JSON.stringify(data));
+            data.dreamTitle = document.getElementById('dreamTitle').value;
+            localStorage.setItem('RMD_DATA_PRO', JSON.stringify(data));
         }
 
         function refreshUI() {
-            document.getElementById('disp_save').innerText = '$' + data.save.toLocaleString();
             document.getElementById('disp_fund').innerText = '$' + data.save.toLocaleString();
-            let remain = (85000 + 5000) - data.km;
-            document.getElementById('disp_count').innerText = (remain > 0 ? remain.toLocaleString() : "該保養了！");
+            let oilRemain = (85000 + 5000) - data.km; // 假設85000換機油
+            document.getElementById('disp_count').innerText = (oilRemain > 0 ? oilRemain.toLocaleString() : "該保養了！");
+            
+            // 輪胎邏輯 (假設每1萬KM調位)
+            let tireRemain = 10000 - (data.km % 10000);
+            document.getElementById('disp_tire').innerText = tireRemain.toLocaleString() + " KM";
+
             let percent = (data.save / target) * 100;
             document.getElementById('progress-bar').style.width = Math.min(percent, 100) + '%';
             saveAll();
-        }
-
-        function saveMoney() {
-            let v = document.getElementById('in_save').value;
-            if(v) {
-                data.save += parseInt(v);
-                document.getElementById('in_save').value = '';
-                refreshUI();
-                alert("數據已同步！夢想小屋進度 +1");
-            }
         }
 
         function updateKm() {
@@ -99,31 +84,22 @@
             if(k) {
                 data.km = parseInt(k);
                 document.getElementById('in_km').value = '';
+                // 如果里程快到了，播放跑車拉轉聲！
+                document.getElementById('engineSound').play();
                 refreshUI();
+                alert("小銀弟數據更新成功！引擎聲已響起！");
             }
         }
 
-        function previewImage(event) {
-            let reader = new FileReader();
-            reader.onload = function(){
-                let output = document.getElementById('preview');
-                output.src = reader.result;
-                output.style.display = "block";
-            };
-            reader.readAsDataURL(event.target.files[0]);
+        function saveMoney() {
+            let v = document.getElementById('in_save').value;
+            if(v) {
+                data.save += parseInt(v);
+                document.getElementById('in_save').value = '';
+                document.getElementById('coinSound').play();
+                refreshUI();
+            }
         }
     </script>
 </body>
 </html>
-
-<div class="card">
-    <input type="text" class="card-title-input" id="carSubName" value="🚗 小銀弟的里程路" onchange="saveAll()">
-    
-    <p>機油倒數：<span class="value" id="disp_count">1,250</span> KM</p>
-    
-    <p>輪胎調位倒數：<span class="value" id="disp_tire">8,000</span> KM</p>
-    <p>電瓶更換至今：<span class="value" id="disp_battery">14</span> 個月</p>
-
-    <input type="number" id="in_km" placeholder="更新目前總里程數">
-    <button class="btn" onclick="updateKm()">更新數據</button>
-</div>
