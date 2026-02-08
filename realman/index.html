@@ -1,129 +1,145 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Man's Drive</title>
+    <title>K9 獸醫護理站 | 全功能專業版</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; text-align: center; padding: 20px; margin: 0; }
-        .r-logo { color: #ff0000; font-size: 80px; font-weight: bold; font-style: italic; text-shadow: 0 0 15px rgba(255,0,0,0.7); margin-top: 20px; }
-        .title-input { background: transparent; border: none; color: #fff; font-size: 24px; font-weight: bold; text-align: center; width: 100%; letter-spacing: 2px; text-transform: uppercase; margin: 15px 0; border-bottom: 1px dashed #444; outline: none; }
-        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 6px solid #ff0000; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        /* 預警機小標題的輸入框樣式 */
-        .card-title-input { background: transparent; border: none; color: #ff0000; font-size: 18px; font-weight: bold; width: 100%; outline: none; margin-bottom: 10px; border-bottom: 1px solid transparent; }
-        .card-title-input:focus { border-bottom: 1px solid #ff0000; }
-        .value { color: #00ff41; font-family: 'Courier New', monospace; font-size: 20px; font-weight: bold; }
-        .btn { background: linear-gradient(145deg, #ff0000, #b30000); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 15px; cursor: pointer; }
-        input[type="number"] { width: calc(100% - 24px); padding: 10px; margin-top: 5px; background: #333; border: 1px solid #444; color: white; border-radius: 5px; outline: none; }
-        #preview { width: 100%; border-radius: 8px; margin-top: 15px; display: none; border: 2px solid #ff0000; }
-        .progress-bg { background:#333; height:12px; border-radius:6px; margin-top:10px; overflow:hidden; }
-        #progress-bar { background:#ff0000; width:0%; height:100%; transition: 0.5s; }
-        .footer { color: #555; font-size: 11px; margin-top: 30px; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; }
+        .medical-paper { background: white; border: 2px solid #334155; box-shadow: 8px 8px 0px #cbd5e1; }
+        .stamp { border: 3px solid #ef4444; color: #ef4444; transform: rotate(-15deg); font-weight: 900; padding: 2px 8px; border-radius: 4px; display: inline-block; font-size: 12px; }
+        .record-row:hover { background-color: #f1f5f9; cursor: pointer; }
     </style>
 </head>
-<body onload="loadData()">
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-    <div class="r-logo">R</div>
-    <input type="text" class="title-input" id="carTitle" value="小銀的專屬浪漫" onchange="saveAll()">
+        function App() {
+            // 1. 初始化 8 隻狗狗資料 (使用 V6 確保強制更新)
+            const [dogs, setDogs] = useState(() => {
+                const saved = localStorage.getItem('K9_MEDICAL_PRO_V6');
+                return saved ? JSON.parse(saved) : [
+                    { id: 1, name: '張布丁', sex: 'M', age: '3Y+', weight: '43.5', breed: '高山犬', logs: [] },
+                    { id: 2, name: '妞妞', sex: 'F', age: '?', weight: '?', breed: '米克斯', logs: [] },
+                    { id: 3, name: '狗狗3號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
+                    { id: 4, name: '狗狗4號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
+                    { id: 5, name: '狗狗5號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
+                    { id: 6, name: '狗狗6號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
+                    { id: 7, name: '狗狗7號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
+                    { id: 8, name: '狗狗8號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] }
+                ];
+            });
 
-    <div class="card">
-        <h3>💰 目前省下的金額</h3>
-        <p>目前累計省下：<span class="value" id="disp_save">$0</span></p>
-        <input type="number" id="in_save" placeholder="輸入省下的金額">
-        <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;" onchange="previewImage(event)">
-        <button class="btn" style="background: #444;" onclick="document.getElementById('cameraInput').click()">📷 拍攝戰利品/零件</button>
-        <img id="preview" src="" alt="維修預覽">
-        <button class="btn" onclick="saveMoney()">回報戰功</button>
-    </div>
+            // 2. 自動存檔功能
+            useEffect(() => {
+                localStorage.setItem('K9_MEDICAL_PRO_V6', JSON.stringify(dogs));
+            }, [dogs]);
 
-    <div class="card">
-        <input type="text" class="card-title-input" id="carSubName" value="🚗 小銀預警機 (Suzuki)" onchange="saveAll()">
-        <p>保養倒數：<span class="value" id="disp_count">5,000</span> KM</p>
-        <input type="number" id="in_km" placeholder="更新目前總里程數">
-        <button class="btn" onclick="updateKm()">更新數據</button>
-    </div>
-
-    <div class="card">
-        <div class="card">
-    <input type="text" class="card-title-input" id="dreamTitle" value="🏆 男人夢想實現場" onchange="saveAll()" style="color: #ff0000;">
-    
-    <p>目標金額：<span class="value">$10,000,000</span></p>
-    <p>目前基金：<span class="value" id="disp_fund">$0</span></p>
-    <div class="progress-bg"><div id="progress-bar"></div></div>
-</div>
-
-
-    <div class="footer">© 68年次硬派開發 - 小黑哥監製<br>FULL CUSTOMIZATION ENABLED_</div>
-
-    <script>
-        let data = { save: 5499, km: 85000, title: "小銀的專屬浪漫", subName: "🚗 小銀預警機 (Suzuki)" };
-        const target = 10000000;
-
-        function loadData() {
-            const saved = localStorage.getItem('RMD_DATA');
-            if(saved) data = JSON.parse(saved);
-            document.getElementById('carTitle').value = data.title;
-            document.getElementById('carSubName').value = data.subName;
-            refreshUI();
-        }
-
-        function saveAll() {
-            data.title = document.getElementById('carTitle').value;
-            data.subName = document.getElementById('carSubName').value;
-            localStorage.setItem('RMD_DATA', JSON.stringify(data));
-        }
-
-        function refreshUI() {
-            document.getElementById('disp_save').innerText = '$' + data.save.toLocaleString();
-            document.getElementById('disp_fund').innerText = '$' + data.save.toLocaleString();
-            let remain = (85000 + 5000) - data.km;
-            document.getElementById('disp_count').innerText = (remain > 0 ? remain.toLocaleString() : "該保養了！");
-            let percent = (data.save / target) * 100;
-            document.getElementById('progress-bar').style.width = Math.min(percent, 100) + '%';
-            saveAll();
-        }
-
-        function saveMoney() {
-            let v = document.getElementById('in_save').value;
-            if(v) {
-                data.save += parseInt(v);
-                document.getElementById('in_save').value = '';
-                refreshUI();
-                alert("數據已同步！夢想小屋進度 +1");
-            }
-        }
-
-        function updateKm() {
-            let k = document.getElementById('in_km').value;
-            if(k) {
-                data.km = parseInt(k);
-                document.getElementById('in_km').value = '';
-                refreshUI();
-            }
-        }
-
-        function previewImage(event) {
-            let reader = new FileReader();
-            reader.onload = function(){
-                let output = document.getElementById('preview');
-                output.src = reader.result;
-                output.style.display = "block";
+            // 3. 修改基本資料功能 (接回斷掉的線)
+            const editBaseInfo = (dogId) => {
+                const dog = dogs.find(d => d.id === dogId);
+                const nName = prompt("修改名字:", dog.name);
+                const nSex = prompt("修改性別 (M/F):", dog.sex);
+                const nAge = prompt("修改年齡:", dog.age);
+                const nWeight = prompt("修改體重 (KG):", dog.weight);
+                const nBreed = prompt("修改品種:", dog.breed);
+                
+                setDogs(dogs.map(d => d.id === dogId ? {
+                    ...d, 
+                    name: nName || d.name,
+                    sex: nSex || d.sex,
+                    age: nAge || d.age,
+                    weight: nWeight || d.weight,
+                    breed: nBreed || d.breed
+                } : d));
             };
-            reader.readAsDataURL(event.target.files[0]);
+
+            // 4. 新增紀錄功能
+            const addLog = (id) => {
+                const note = prompt("請輸入臨床診斷或用藥紀錄：");
+                if (!note) return;
+                setDogs(dogs.map(d => d.id === id ? { ...d, logs: [{ id: Date.now(), time: new Date().toLocaleString(), note }, ...d.logs] } : d));
+            };
+
+            // 5. 修改/刪除紀錄功能
+            const editLog = (dogId, logId) => {
+                const dog = dogs.find(d => d.id === dogId);
+                const log = dog.logs.find(l => l.id === logId);
+                const action = prompt("請選擇操作：\n1. 修改紀錄\n2. 刪除紀錄");
+                
+                if (action === "1") {
+                    const newNote = prompt("修改紀錄內容:", log.note);
+                    if (newNote) {
+                        setDogs(dogs.map(d => d.id === dogId ? { ...d, logs: d.logs.map(l => l.id === logId ? { ...l, note: newNote } : l) } : d));
+                    }
+                } else if (action === "2") {
+                    if (confirm("確定刪除？")) {
+                        setDogs(dogs.map(d => d.id === dogId ? { ...d, logs: d.logs.filter(l => l.id !== logId) } : d));
+                    }
+                }
+            };
+
+            return (
+                <div className="p-4 max-w-4xl mx-auto">
+                    <header className="flex justify-between items-end border-b-4 border-slate-800 pb-2 mb-6">
+                        <div>
+                            <h1 className="text-3xl font-black tracking-tighter text-slate-800">台灣精銳犬隻 臨床病歷系統</h1>
+                            <p className="text-xs font-bold text-slate-500">專業主治醫師：小黑哥</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-xs font-mono font-bold uppercase">Clinical System v6.0</p>
+                            <div className="stamp">已認證</div>
+                        </div>
+                    </header>
+
+                    {dogs.map(dog => (
+                        <div key={dog.id} className="medical-paper p-6 mb-10 relative">
+                            <button onClick={() => editBaseInfo(dog.id)} className="absolute right-6 top-6 text-xl" title="編輯基本資料">✏️</button>
+                            <div className="grid grid-cols-4 border-2 border-slate-800 mb-4">
+                                <div className="bg-slate-800 text-white p-2 text-xs font-bold uppercase">病患姓名</div>
+                                <div className="p-2 border-r-2 border-slate-800 font-black text-blue-600">{dog.name}</div>
+                                <div className="bg-slate-800 text-white p-2 text-xs font-bold uppercase">目前體重</div>
+                                <div className="p-2 font-black">{dog.weight} KG</div>
+                                <div className="bg-slate-800 text-white p-2 text-xs font-bold uppercase border-t-2 border-slate-800">性別 / 年齡</div>
+                                <div className="p-2 border-r-2 border-slate-800 border-t-2 border-slate-800 font-bold">{dog.sex} / {dog.age}</div>
+                                <div className="bg-slate-800 text-white p-2 text-xs font-bold uppercase border-t-2 border-slate-800">品種</div>
+                                <div className="p-2 border-t-2 border-slate-800 font-bold">{dog.breed}</div>
+                            </div>
+
+                            <div className="border-2 border-slate-800 min-h-[150px]">
+                                <div className="grid grid-cols-4 bg-slate-100 border-b-2 border-slate-800 font-bold text-sm">
+                                    <div className="p-2 border-r-2 border-slate-800 col-span-1">時間</div>
+                                    <div className="p-2 col-span-3">臨床診斷內容 (點擊修改)</div>
+                                </div>
+                                {dog.logs.map((log) => (
+                                    <div key={log.id} onClick={() => editLog(dog.id, log.id)} className="grid grid-cols-4 border-b border-slate-300 record-row text-sm">
+                                        <div className="p-2 border-r-2 border-slate-800 font-mono text-[11px] text-slate-500">{log.time}</div>
+                                        <div className="p-2 col-span-3 font-medium text-slate-800 italic">{log.note}</div>
+                                    </div>
+                                ))}
+                                {dog.logs.length === 0 && <div className="p-10 text-center text-slate-300 italic">尚無診療紀錄</div>}
+                            </div>
+                            <button onClick={() => addLog(dog.id)} className="mt-4 w-full bg-slate-800 text-white py-3 font-black text-sm hover:bg-emerald-600 transition-colors">
+                                + 新增臨床紀錄 (ADD ENTRY)
+                            </button>
+                        </div>
+                    ))}
+                    <footer className="text-center text-[10px] text-slate-400 mt-10 uppercase tracking-widest font-bold">
+                        台灣精銳犬隻專用病歷表 - 非授權請勿使用
+                    </footer>
+                </div>
+            );
         }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
-
-<div class="card">
-    <input type="text" class="card-title-input" id="carSubName" value="🚗 小銀弟的里程路" onchange="saveAll()">
-    
-    <p>機油倒數：<span class="value" id="disp_count">1,250</span> KM</p>
-    
-    <p>輪胎調位倒數：<span class="value" id="disp_tire">8,000</span> KM</p>
-    <p>電瓶更換至今：<span class="value" id="disp_battery">14</span> 個月</p>
-
-    <input type="number" id="in_km" placeholder="更新目前總里程數">
-    <button class="btn" onclick="updateKm()">更新數據</button>
-</div>
