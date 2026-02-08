@@ -1,64 +1,132 @@
-<style>
-    /* 新增刪除按鈕的樣式 */
-    .preview-container { position: relative; width: 100%; margin-top: 10px; display: none; }
-    #preview { width: 100%; border-radius: 8px; border: 2px solid #ddd; }
-    .del-btn { 
-        position: absolute; top: 10px; right: 10px; 
-        background: rgba(231, 76, 60, 0.9); color: white; 
-        border: none; border-radius: 50%; width: 35px; height: 35px; 
-        font-size: 20px; font-weight: bold; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-</style>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圓夢記帳本-最終修正版</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; color: #333; margin: 0; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        h2 { color: #2c3e50; font-size: 1.1rem; border-left: 5px solid #2980b9; padding-left: 10px; margin: 0 0 10px 0; }
+        .input-group { margin: 8px 0; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        button { flex: 1; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        .cam-btn { background-color: #3498db; }
+        .fixed-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eee; font-size: 15px; }
+        .pencil-btn { background: none; border: none; color: #2980b9; cursor: pointer; font-size: 18px; padding: 0; }
+        
+        /* 修正預覽區域 */
+        .preview-container { position: relative; width: 100%; margin-top: 15px; display: none; }
+        #preview { width: 100%; border-radius: 8px; border: 1px solid #ddd; display: block; }
+        .del-btn { 
+            position: absolute; top: 5px; right: 5px; 
+            background: rgba(231, 76, 60, 0.9); color: white; 
+            border: none; border-radius: 50%; width: 30px; height: 30px; 
+            font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .result { font-size: 26px; font-weight: bold; color: #e74c3c; text-align: center; background: #fff5f5; padding: 15px; border-radius: 8px; }
+    </style>
+</head>
+<body>
 
-<div class="card">
-    <h2>🧾 2. 發票/小帳 (拍照/記帳)</h2>
-    <div class="btn-row">
-        <button class="cam-btn" onclick="document.getElementById('camFile').click()">📸 拍照</button>
-        <button onclick="addExpense()">💰 確認扣款</button>
+    <div class="card">
+        <h2>💰 1. 薪資水源頭</h2>
+        <div class="input-group">
+            <input type="number" id="salaryInput" placeholder="輸入實領薪資" oninput="calculateBalance()">
+        </div>
     </div>
 
-    <div class="preview-container" id="pContainer">
-        <img id="preview" alt="發票預覽">
-        <button class="del-btn" onclick="deletePhoto()">×</button>
+    <div class="card">
+        <h2>固定支出 (點 ✏️ 修改)</h2>
+        <div class="fixed-item">
+            <span>🐾 孩子預備金: $<span id="val1">3000</span></span>
+            <button class="pencil-btn" onclick="editFixed('val1', '孩子預備金')">✏️</button>
+        </div>
+        <div class="fixed-item">
+            <span>🚗 小銀養車金: $<span id="val2">2000</span></span>
+            <button class="pencil-btn" onclick="editFixed('val2', '小銀養車金')">✏️</button>
+        </div>
+        <div class="fixed-item">
+            <span>🏠 生活雜支費: $<span id="val3">10000</span></span>
+            <button class="pencil-btn" onclick="editFixed('val3', '生活雜支費')">✏️</button>
+        </div>
     </div>
-</div>
 
-<script>
-    // 新增刪除照片的邏輯
-    function showPreview(input) {
-        const container = document.getElementById('pContainer');
-        const preview = document.getElementById('preview');
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.src = e.target.result;
-                container.style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
+    <div class="card">
+        <h2>🧾 2. 發票/小帳 (拍照/記帳)</h2>
+        <div class="input-group"><input type="text" id="itemName" placeholder="項目 (例如: 加油)"></div>
+        <div class="input-group"><input type="number" id="itemPrice" placeholder="金額"></div>
+        
+        <input type="file" id="camFile" accept="image/*" capture="camera" style="display: none;" onchange="showPreview(this)">
+        
+        <div class="btn-row">
+            <button class="cam-btn" onclick="document.getElementById('camFile').click()">📸 拍照</button>
+            <button onclick="addExpense()">💰 確認扣款</button>
+        </div>
+        
+        <div class="preview-container" id="pContainer">
+            <img id="preview" src="" alt="發票預覽">
+            <button class="del-btn" onclick="deletePhoto()">×</button>
+        </div>
+    </div>
 
-    function deletePhoto() {
-        if(confirm("確定要刪除這張照片重新拍嗎？")) {
-            document.getElementById('pContainer').style.display = 'none';
-            document.getElementById('preview').src = '';
-            document.getElementById('camFile').value = ''; // 清空檔案選擇器
-        }
-    }
+    <div class="card">
+        <h2>🏁 3. 當前剩餘夢想基金</h2>
+        <div class="result" id="totalBalance">$ 0</div>
+    </div>
 
-    // 在 addExpense 成功後也要隱藏容器
-    function addExpense() {
-        let price = parseInt(document.getElementById('itemPrice').value) || 0;
-        if(price > 0) {
-            currentExpenses += price;
-            document.getElementById('itemPrice').value = '';
-            document.getElementById('itemName').value = '';
-            document.getElementById('pContainer').style.display = 'none'; // 隱藏容器
-            document.getElementById('camFile').value = '';
-            calculateBalance();
-            alert('扣款成功！');
+    <script>
+        let currentExpenses = 0;
+
+        function editFixed(id, name) {
+            let newVal = prompt("請輸入新的「" + name + "」金額：", document.getElementById(id).innerText);
+            if (newVal !== null && !isNaN(newVal) && newVal !== "") {
+                document.getElementById(id).innerText = newVal;
+                calculateBalance();
+            }
         }
-    }
-</script>
+
+        function showPreview(input) {
+            const container = document.getElementById('pContainer');
+            const preview = document.getElementById('preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    container.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function deletePhoto() {
+            if(confirm("確定要刪除照片重新拍嗎？")) {
+                document.getElementById('pContainer').style.display = 'none';
+                document.getElementById('camFile').value = '';
+            }
+        }
+
+        function calculateBalance() {
+            let salary = parseFloat(document.getElementById('salaryInput').value) || 0;
+            let f1 = parseFloat(document.getElementById('val1').innerText) || 0;
+            let f2 = parseFloat(document.getElementById('val2').innerText) || 0;
+            let f3 = parseFloat(document.getElementById('val3').innerText) || 0;
+            let balance = salary - (f1 + f2 + f3) - currentExpenses;
+            document.getElementById('totalBalance').innerText = '$ ' + balance.toLocaleString();
+        }
+
+        function addExpense() {
+            let price = parseInt(document.getElementById('itemPrice').value) || 0;
+            if(price > 0) {
+                currentExpenses += price;
+                document.getElementById('itemPrice').value = '';
+                document.getElementById('itemName').value = '';
+                document.getElementById('pContainer').style.display = 'none';
+                calculateBalance();
+                alert('扣款成功！');
+            }
+        }
+    </script>
+</body>
+</html>
