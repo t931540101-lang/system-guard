@@ -3,25 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>廠商餐費登記表-數位版</title>
+    <title>廠商餐費登記表-排序版</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f4f4; padding: 15px; margin: 0; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
         h2 { text-align: center; color: #333; font-size: 1.3rem; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px; }
-        
-        /* 輸入區分格 */
         .input-box { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; background: #fafafa; }
         .btn-write { width: 100%; padding: 15px; background-color: #333; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-
-        /* 表格區 */
         .table-container { width: 100%; border: 1.5px solid #333; border-radius: 4px; overflow: hidden; background: white; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #333; padding: 10px 5px; text-align: center; font-size: 14px; }
         th { background-color: #e0e0e0; font-weight: bold; }
-        .weekend { background-color: #fff9c4; } /* 模擬紙本黃色假日 */
+        .weekend { background-color: #fff9c4; }
         .total-row { background-color: #eee; font-weight: bold; font-size: 16px; }
-        .edit-btn { background: none; border: none; color: #2980b9; cursor: pointer; font-size: 18px; padding: 0; }
+        .edit-btn { background: none; border: none; color: #2980b9; cursor: pointer; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -50,8 +46,7 @@
                         <th style="width: 15%;">✏️</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    </tbody>
+                <tbody id="tableBody"></tbody>
                 <tfoot>
                     <tr class="total-row">
                         <td colspan="2">本月小計：</td>
@@ -63,7 +58,6 @@
     </div>
 
     <script>
-        // 設定今天日期
         document.getElementById('entryDate').valueAsDate = new Date();
         let data = [];
 
@@ -71,46 +65,48 @@
             const date = document.getElementById('entryDate').value;
             const vendor = document.getElementById('vendorName').value;
             const qty = parseInt(document.getElementById('quantity').value) || 0;
-            const price = qty * 65;
-
             if (qty > 0) {
-                data.push({ date, vendor, qty, price });
-                renderTable();
+                data.push({ date, vendor, qty, price: qty * 65 });
+                sortAndRender();
                 document.getElementById('quantity').value = "1";
             }
+        }
+
+        function sortAndRender() {
+            // 關鍵功能：自動按日期排序
+            data.sort((a, b) => new Date(a.date) - new Date(b.date));
+            renderTable();
         }
 
         function renderTable() {
             const body = document.getElementById('tableBody');
             let totalSum = 0;
             body.innerHTML = "";
-
             data.forEach((item, index) => {
                 totalSum += item.price;
                 const row = body.insertRow();
-                
-                // 判斷週末標色
                 const day = new Date(item.date).getDay();
                 if (day === 0 || day === 6) row.className = "weekend";
-
                 row.insertCell(0).innerText = item.date.split('-').slice(1).join('/');
                 row.insertCell(1).innerText = item.vendor;
                 row.insertCell(2).innerText = "$" + item.price.toLocaleString();
                 const editCell = row.insertCell(3);
                 editCell.innerHTML = `<button class="edit-btn" onclick="editItem(${index})">✏️</button>`;
             });
-
             document.getElementById('grandTotal').innerText = "$" + totalSum.toLocaleString();
         }
 
         function editItem(index) {
-            const currentQty = data[index].qty;
-            const newQty = prompt(`修改「${data[index].vendor}」的份數：`, currentQty);
-            
-            if (newQty !== null && !isNaN(newQty) && newQty !== "") {
-                data[index].qty = parseInt(newQty);
-                data[index].price = data[index].qty * 65;
-                renderTable();
+            // 同時提供日期與份數修改
+            let newDate = prompt("修改日期 (格式: YYYY-MM-DD)", data[index].date);
+            if (newDate) {
+                let newQty = prompt("修改份數：", data[index].qty);
+                if (newQty !== null && !isNaN(newQty)) {
+                    data[index].date = newDate;
+                    data[index].qty = parseInt(newQty);
+                    data[index].price = data[index].qty * 65;
+                    sortAndRender(); // 修改後再次自動排序
+                }
             }
         }
     </script>
