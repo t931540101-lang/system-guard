@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>廠商餐費登記表-排序版</title>
+    <title>廠商餐費登記表-分類結算版</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f4f4; padding: 15px; margin: 0; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
@@ -16,6 +16,7 @@
         th, td { border: 1px solid #333; padding: 10px 5px; text-align: center; font-size: 14px; }
         th { background-color: #e0e0e0; font-weight: bold; }
         .weekend { background-color: #fff9c4; }
+        .vendor-total { background-color: #f1f8e9; color: #2e7d32; font-weight: bold; } /* 廠商分項顏色 */
         .total-row { background-color: #eee; font-weight: bold; font-size: 16px; }
         .edit-btn { background: none; border: none; color: #2980b9; cursor: pointer; font-size: 18px; }
     </style>
@@ -47,12 +48,8 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
-                <tfoot>
-                    <tr class="total-row">
-                        <td colspan="2">本月小計：</td>
-                        <td id="grandTotal" colspan="2">$ 0</td>
-                    </tr>
-                </tfoot>
+                <tfoot id="tableFoot">
+                    </tfoot>
             </table>
         </div>
     </div>
@@ -73,17 +70,25 @@
         }
 
         function sortAndRender() {
-            // 關鍵功能：自動按日期排序
             data.sort((a, b) => new Date(a.date) - new Date(b.date));
             renderTable();
         }
 
         function renderTable() {
             const body = document.getElementById('tableBody');
+            const foot = document.getElementById('tableFoot');
             let totalSum = 0;
+            let vendorTotals = { "俊丰": 0, "祥箐": 0 }; // 這裡可以擴充其他廠商
+
             body.innerHTML = "";
             data.forEach((item, index) => {
                 totalSum += item.price;
+                if(vendorTotals[item.vendor] !== undefined) {
+                    vendorTotals[item.vendor] += item.price;
+                } else {
+                    vendorTotals[item.vendor] = item.price; // 如果有新廠商自動增加
+                }
+
                 const row = body.insertRow();
                 const day = new Date(item.date).getDay();
                 if (day === 0 || day === 6) row.className = "weekend";
@@ -93,19 +98,27 @@
                 const editCell = row.insertCell(3);
                 editCell.innerHTML = `<button class="edit-btn" onclick="editItem(${index})">✏️</button>`;
             });
-            document.getElementById('grandTotal').innerText = "$" + totalSum.toLocaleString();
+
+            // 生成分類小計的頁腳
+            let footHtml = "";
+            for (let vendor in vendorTotals) {
+                if (vendorTotals[vendor] > 0) {
+                    footHtml += `<tr class="vendor-total"><td colspan="2">${vendor} 小計：</td><td colspan="2">$${vendorTotals[vendor].toLocaleString()}</td></tr>`;
+                }
+            }
+            footHtml += `<tr class="total-row"><td colspan="2">本月總計：</td><td colspan="2">$${totalSum.toLocaleString()}</td></tr>`;
+            foot.innerHTML = footHtml;
         }
 
         function editItem(index) {
-            // 同時提供日期與份數修改
-            let newDate = prompt("修改日期 (格式: YYYY-MM-DD)", data[index].date);
+            let newDate = prompt("修改日期 (YYYY-MM-DD)", data[index].date);
             if (newDate) {
                 let newQty = prompt("修改份數：", data[index].qty);
                 if (newQty !== null && !isNaN(newQty)) {
                     data[index].date = newDate;
                     data[index].qty = parseInt(newQty);
                     data[index].price = data[index].qty * 65;
-                    sortAndRender(); // 修改後再次自動排序
+                    sortAndRender();
                 }
             }
         }
