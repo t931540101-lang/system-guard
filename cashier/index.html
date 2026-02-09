@@ -1,73 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>收銀系統</title>
+    <title>警衛收銀系統-專業結算版</title>
     <style>
-        /* 改用最保險的配色：綠底黑字 */
-        body { background: #008000; color: #000; font-family: sans-serif; padding: 15px; margin: 0; }
-        .box { background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-        input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; font-size: 18px; }
-        .big-btn { width: 100%; padding: 20px; background: #000; color: #fff; border: none; border-radius: 10px; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
-        .list { background: #e0f0e0; padding: 10px; border-radius: 8px; min-height: 100px; }
-        .item { border-bottom: 1px solid #999; padding: 8px 0; display: flex; justify-content: space-between; }
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; margin: 0; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        h2 { color: #2c3e50; font-size: 1.1rem; border-left: 5px solid #e67e22; padding-left: 10px; }
+        .input-group { margin: 10px 0; display: flex; gap: 5px; }
+        input { flex: 2; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+        .price-input { flex: 1; }
+        button { padding: 10px; background-color: #e67e22; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .edit-btn { background: none; color: #3498db; border: none; cursor: pointer; font-size: 18px; }
+        .total-box { background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center; font-size: 22px; font-weight: bold; color: #d35400; }
     </style>
 </head>
 <body>
 
-    <h2 style="text-align:center; color:white;">🛡️ 警衛收銀系統</h2>
-
-    <div class="box">
-        <input type="date" id="d">
-        <input type="text" id="v" placeholder="廠商名稱">
+    <div class="card">
+        <h2>💰 每日收銀登記</h2>
+        <div class="input-group">
+            <input type="text" id="entryName" placeholder="項目 (如: 廢紙回收)">
+            <input type="number" id="entryPrice" class="price-input" placeholder="金額">
+            <button onclick="addEntry()">登記</button>
+        </div>
     </div>
 
-    <div style="text-align:center; background:#000; color:#0f0; padding:15px; border-radius:10px; margin-bottom:10px;">
-        <div style="font-size:14px;">應收金額 ($65/餐)</div>
-        <div id="m" style="font-size:40px; font-weight:bold;">$0</div>
-    </div>
-
-    <button class="big-btn" onclick="a()">➕ 增加一餐</button>
-    <button style="width:48%; padding:15px; background:#fff;" onclick="c()">🔄 重算</button>
-    <button style="width:48%; padding:15px; background:#f00; color:#fff;" onclick="s()">💾 存檔</button>
-
-    <div class="list">
-        <div style="font-weight:bold; border-bottom:2px solid #000; margin-bottom:5px;">本月紀錄：</div>
-        <div id="l"></div>
-    </div>
-
-<script>
-    let t = 0;
-    let r = JSON.parse(localStorage.getItem('gc') || "[]");
-
-    window.onload = function() {
-        document.getElementById('d').value = new Date().toISOString().split('T')[0];
-        rl();
-    };
-
-    function a() { t += 65; document.getElementById('m').innerText = '$' + t; }
-    function c() { t = 0; document.getElementById('m').innerText = '$0'; }
-
-    function s() {
-        const vendor = document.getElementById('v').value || "未命名";
-        const date = document.getElementById('d').value;
-        if(t === 0) return;
-        r.unshift({ d: date, v: vendor, t: t });
-        localStorage.setItem('gc', JSON.stringify(r));
-        alert("存好了！");
-        c(); document.getElementById('v').value = "";
-        rl();
-    }
-
-    function rl() {
-        document.getElementById('l').innerHTML = r.map(i => `
-            <div class="item">
-                <span>${i.d.substring(5)} ${i.v}</span>
-                <span style="font-weight:bold;">$${i.t}</span>
+    <div class="card">
+        <h2>📋 收銀紀錄明細 (點 ✏️ 修改)</h2>
+        <div id="entryList">
             </div>
-        `).join('');
-    }
-</script>
+    </div>
+
+    <div class="card">
+        <h2>📊 月底結算總額</h2>
+        <div class="total-box" id="totalAmount">總計: $ 0</div>
+    </div>
+
+    <script>
+        let entries = [];
+
+        function addEntry() {
+            let name = document.getElementById('entryName').value;
+            let price = parseInt(document.getElementById('entryPrice').value) || 0;
+            if(name && price > 0) {
+                entries.push({ name: name, price: price });
+                updateUI();
+                document.getElementById('entryName').value = '';
+                document.getElementById('entryPrice').value = '';
+            }
+        }
+
+        function editEntry(index) {
+            let newPrice = prompt("修改「" + entries[index].name + "」的金額：", entries[index].price);
+            if (newPrice !== null && !isNaN(newPrice) && newPrice !== "") {
+                entries[index].price = parseInt(newPrice);
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            let listHtml = '';
+            let total = 0;
+            entries.forEach((item, index) => {
+                total += item.price;
+                listHtml += `
+                    <div class="list-item">
+                        <span>${item.name}: $${item.price.toLocaleString()}</span>
+                        <button class="edit-btn" onclick="editEntry(${index})">✏️</button>
+                    </div>`;
+            });
+            document.getElementById('entryList').innerHTML = listHtml;
+            document.getElementById('totalAmount').innerText = "總計: $ " + total.toLocaleString();
+        }
+    </script>
 </body>
 </html>
