@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圓夢記帳本-自訂名稱版</title>
+    <title>圓夢記帳本-無限擴充版</title>
     <style>
         body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; color: #333; margin: 0; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        h2 { color: #2c3e50; font-size: 1.1rem; border-left: 5px solid #2980b9; padding-left: 10px; margin: 0 0 10px 0; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #2980b9; padding-left: 10px; margin-bottom: 10px; }
+        h2 { color: #2c3e50; font-size: 1.1rem; margin: 0; }
+        .add-btn { background-color: #2980b9; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .input-group { margin: 8px 0; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         .btn-row { display: flex; gap: 10px; margin-top: 10px; }
         button { flex: 1; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
         .cam-btn { background-color: #3498db; }
         .fixed-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eee; font-size: 15px; }
+        .btn-group { display: flex; gap: 10px; }
         .pencil-btn { background: none; border: none; color: #2980b9; cursor: pointer; font-size: 18px; padding: 0; }
+        .del-btn-small { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 18px; padding: 0; }
         .preview-container { position: relative; width: 100%; margin-top: 15px; display: none; }
         #preview { width: 100%; border-radius: 8px; border: 1px solid #ddd; display: block; }
         .del-btn { position: absolute; top: 5px; right: 5px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -24,20 +28,22 @@
 <body>
 
     <div class="card">
-        <h2>💰 1. 薪資水源頭</h2>
+        <div class="header-row"><h2>💰 1. 薪資水源頭</h2></div>
         <div class="input-group">
             <input type="number" id="salaryInput" placeholder="輸入實領薪資" oninput="calculateBalance()">
         </div>
     </div>
 
     <div class="card">
-        <h2>固定支出 (點 ✏️ 修改項目與金額)</h2>
-        <div id="fixedList">
-            </div>
+        <div class="header-row">
+            <h2>固定支出 (點 ✏️ 修改)</h2>
+            <button class="add-btn" onclick="addNewFixed()">+</button>
+        </div>
+        <div id="fixedList"></div>
     </div>
 
     <div class="card">
-        <h2>🧾 2. 發票/小帳 (拍照/記帳)</h2>
+        <div class="header-row"><h2>🧾 2. 發票/小帳 (拍照/記帳)</h2></div>
         <div class="input-group"><input type="text" id="itemName" placeholder="項目 (例如: 加油)"></div>
         <div class="input-group"><input type="number" id="itemPrice" placeholder="金額"></div>
         <input type="file" id="camFile" accept="image/*" capture="camera" style="display: none;" onchange="showPreview(this)">
@@ -52,13 +58,13 @@
     </div>
 
     <div class="card">
-        <h2>🏁 3. 當前剩餘夢想基金</h2>
+        <div class="header-row"><h2>🏁 3. 當前剩餘夢想基金</h2></div>
         <div class="result" id="totalBalance">$ 0</div>
     </div>
 
     <script>
         let currentExpenses = 0;
-        // 初始化固定項目（從保險箱讀取）
+        // 初始化固定項目
         let fixedData = JSON.parse(localStorage.getItem('dreamFixedData')) || [
             { label: "🐾 孩子預備金", val: 3000 },
             { label: "🚗 養車金", val: 2000 },
@@ -72,11 +78,25 @@
                 list.innerHTML += `
                     <div class="fixed-item">
                         <span>${item.label}: $<span>${item.val}</span></span>
-                        <button class="pencil-btn" onclick="editFixed(${index})">✏️</button>
+                        <div class="btn-group">
+                            <button class="pencil-btn" onclick="editFixed(${index})">✏️</button>
+                            <button class="del-btn-small" onclick="deleteFixed(${index})">🗑️</button>
+                        </div>
                     </div>
                 `;
             });
             calculateBalance();
+        }
+
+        function addNewFixed() {
+            let name = prompt("請輸入新支出項目名稱：", "新項目");
+            if (name) {
+                let val = prompt("請輸入金額：", "0");
+                if (val !== null && !isNaN(val)) {
+                    fixedData.push({ label: name, val: parseFloat(val) });
+                    saveData();
+                }
+            }
         }
 
         function editFixed(index) {
@@ -86,10 +106,21 @@
                 if (newVal !== null && !isNaN(newVal)) {
                     fixedData[index].label = newLabel;
                     fixedData[index].val = parseFloat(newVal);
-                    localStorage.setItem('dreamFixedData', JSON.stringify(fixedData));
-                    renderFixed();
+                    saveData();
                 }
             }
+        }
+
+        function deleteFixed(index) {
+            if (confirm("確定要刪除這項支出嗎？")) {
+                fixedData.splice(index, 1);
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('dreamFixedData', JSON.stringify(fixedData));
+            renderFixed();
         }
 
         function calculateBalance() {
@@ -131,7 +162,6 @@
             }
         }
 
-        // 初始渲染
         renderFixed();
     </script>
 </body>
