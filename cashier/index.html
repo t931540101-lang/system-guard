@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>廠商餐費-保險箱版</title>
+    <title>廠商餐費-全能自訂版</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f4f4; padding: 15px; margin: 0; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
         h2 { text-align: center; color: #333; font-size: 1.2rem; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px; }
-        .input-box { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .input-box { display: grid; grid-template-columns: 1.2fr 1fr 0.8fr; gap: 8px; margin-bottom: 10px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; background: #fafafa; }
         .btn-write { width: 100%; padding: 15px; background-color: #333; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
         .table-container { width: 100%; border: 1.5px solid #333; border-radius: 4px; overflow: hidden; background: white; }
@@ -25,15 +25,18 @@
 <body>
 
     <div class="card">
-        <h2>廠商餐費登記 (保險箱版)</h2>
+        <h2>廠商餐費登記 (全能自訂版)</h2>
         <div class="input-box">
             <input type="date" id="entryDate">
-            <select id="vendorName">
+            <select id="vendorSelect" onchange="checkVendor(this.value)">
                 <option value="俊丰">俊丰</option>
                 <option value="祥箐">祥箐</option>
+                <option value="CUSTOM">➕ 自定義名稱</option>
             </select>
             <input type="number" id="quantity" value="1">
         </div>
+        <input type="text" id="customVendor" placeholder="請輸入廠商名稱" style="display:none; margin-bottom:10px;">
+        
         <button class="btn-write" onclick="addEntry()">寫入表格並存檔 ✍️</button>
     </div>
 
@@ -57,26 +60,37 @@
 
     <script>
         document.getElementById('entryDate').valueAsDate = new Date();
-        
-        // 從保險箱(LocalStorage)讀取舊資料，如果沒資料就給空陣列
         let data = JSON.parse(localStorage.getItem('cashierData')) || [];
-        
-        // 頁面一打開就先渲染一次舊資料
         sortAndRender();
+
+        function checkVendor(val) {
+            const customInput = document.getElementById('customVendor');
+            customInput.style.display = (val === 'CUSTOM') ? 'block' : 'none';
+        }
 
         function addEntry() {
             const date = document.getElementById('entryDate').value;
-            const vendor = document.getElementById('vendorName').value;
+            const select = document.getElementById('vendorSelect');
+            let vendor = select.value;
+            
+            if (vendor === 'CUSTOM') {
+                vendor = document.getElementById('customVendor').value.trim();
+                if (!vendor) { alert("請輸入廠商名稱！"); return; }
+            }
+
             const qty = parseInt(document.getElementById('quantity').value) || 0;
             if (qty > 0) {
                 data.push({ date, vendor, qty, price: qty * 65 });
                 saveAndRender();
                 document.getElementById('quantity').value = "1";
+                // 重置自定義輸入
+                document.getElementById('customVendor').value = "";
+                document.getElementById('customVendor').style.display = "none";
+                select.value = "俊丰"; 
             }
         }
 
         function saveAndRender() {
-            // 把資料鎖進保險箱
             localStorage.setItem('cashierData', JSON.stringify(data));
             sortAndRender();
         }
@@ -90,16 +104,20 @@
             const body = document.getElementById('tableBody');
             const foot = document.getElementById('tableFoot');
             let totalSum = 0;
-            let vendorTotals = { "俊丰": 0, "祥箐": 0 };
-            let vendorCounts = { "俊丰": 0, "祥箐": 0 };
+            let vendorTotals = {};
+            let vendorCounts = {};
             body.innerHTML = "";
 
             data.forEach((item, index) => {
                 totalSum += item.price;
-                if (vendorTotals[item.vendor] !== undefined) {
-                    vendorTotals[item.vendor] += item.price;
-                    vendorCounts[item.vendor]++;
+                // 自動建立廠商統計邏輯（這就是框架的靈活性）
+                if (!vendorTotals[item.vendor]) {
+                    vendorTotals[item.vendor] = 0;
+                    vendorCounts[item.vendor] = 0;
                 }
+                vendorTotals[item.vendor] += item.price;
+                vendorCounts[item.vendor]++;
+
                 const row = body.insertRow();
                 const day = new Date(item.date).getDay();
                 if (day === 0 || day === 6) row.className = "weekend";
@@ -112,23 +130,25 @@
 
             let footHtml = "";
             for (let v in vendorTotals) {
-                if (vendorTotals[v] > 0) {
-                    footHtml += `<tr class="vendor-total"><td colspan="2">${v} (${vendorCounts[v]}筆)：</td><td colspan="2">$${vendorTotals[v].toLocaleString()}</td></tr>`;
-                }
+                footHtml += `<tr class="vendor-total"><td colspan="2">${v} (${vendorCounts[v]}筆)：</td><td colspan="2">$${vendorTotals[v].toLocaleString()}</td></tr>`;
             }
             footHtml += `<tr class="total-row"><td colspan="2">本月總結：</td><td colspan="2">$${totalSum.toLocaleString()}</td></tr>`;
             foot.innerHTML = footHtml;
         }
 
         function editItem(index) {
-            let newDate = prompt("修改日期 (YYYY-MM-DD)", data[index].date);
-            if (newDate) {
-                let newQty = prompt(`修改份數：`, data[index].qty);
-                if (newQty !== null && !isNaN(newQty)) {
-                    data[index].date = newDate;
-                    data[index].qty = parseInt(newQty);
-                    data[index].price = data[index].qty * 65;
-                    saveAndRender(); // 修改也要存檔
+            let newVendor = prompt("修改廠商名稱", data[index].vendor);
+            if (newVendor) {
+                let newDate = prompt("修改日期 (YYYY-MM-DD)", data[index].date);
+                if (newDate) {
+                    let newQty = prompt(`修改份數：`, data[index].qty);
+                    if (newQty !== null && !isNaN(newQty)) {
+                        data[index].vendor = newVendor;
+                        data[index].date = newDate;
+                        data[index].qty = parseInt(newQty);
+                        data[index].price = data[index].qty * 65;
+                        saveAndRender();
+                    }
                 }
             }
         }
