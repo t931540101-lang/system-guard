@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圓夢記帳本-最終修正版</title>
+    <title>圓夢記帳本-自訂名稱版</title>
     <style>
         body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; color: #333; margin: 0; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
@@ -15,16 +15,9 @@
         .cam-btn { background-color: #3498db; }
         .fixed-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eee; font-size: 15px; }
         .pencil-btn { background: none; border: none; color: #2980b9; cursor: pointer; font-size: 18px; padding: 0; }
-        
-        /* 修正預覽區域 */
         .preview-container { position: relative; width: 100%; margin-top: 15px; display: none; }
         #preview { width: 100%; border-radius: 8px; border: 1px solid #ddd; display: block; }
-        .del-btn { 
-            position: absolute; top: 5px; right: 5px; 
-            background: rgba(231, 76, 60, 0.9); color: white; 
-            border: none; border-radius: 50%; width: 30px; height: 30px; 
-            font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
+        .del-btn { position: absolute; top: 5px; right: 5px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .result { font-size: 26px; font-weight: bold; color: #e74c3c; text-align: center; background: #fff5f5; padding: 15px; border-radius: 8px; }
     </style>
 </head>
@@ -38,33 +31,20 @@
     </div>
 
     <div class="card">
-        <h2>固定支出 (點 ✏️ 修改)</h2>
-        <div class="fixed-item">
-            <span>🐾 孩子預備金: $<span id="val1">3000</span></span>
-            <button class="pencil-btn" onclick="editFixed('val1', '孩子預備金')">✏️</button>
-        </div>
-        <div class="fixed-item">
-            <span>🚗 養車金: $<span id="val2">2000</span></span>
-            <button class="pencil-btn" onclick="editFixed('val2', '小銀養車金')">✏️</button>
-        </div>
-        <div class="fixed-item">
-            <span>🏠 生活雜支費: $<span id="val3">10000</span></span>
-            <button class="pencil-btn" onclick="editFixed('val3', '生活雜支費')">✏️</button>
-        </div>
+        <h2>固定支出 (點 ✏️ 修改項目與金額)</h2>
+        <div id="fixedList">
+            </div>
     </div>
 
     <div class="card">
         <h2>🧾 2. 發票/小帳 (拍照/記帳)</h2>
         <div class="input-group"><input type="text" id="itemName" placeholder="項目 (例如: 加油)"></div>
         <div class="input-group"><input type="number" id="itemPrice" placeholder="金額"></div>
-        
         <input type="file" id="camFile" accept="image/*" capture="camera" style="display: none;" onchange="showPreview(this)">
-        
         <div class="btn-row">
             <button class="cam-btn" onclick="document.getElementById('camFile').click()">📸 拍照</button>
             <button onclick="addExpense()">💰 確認扣款</button>
         </div>
-        
         <div class="preview-container" id="pContainer">
             <img id="preview" src="" alt="發票預覽">
             <button class="del-btn" onclick="deletePhoto()">×</button>
@@ -78,12 +58,56 @@
 
     <script>
         let currentExpenses = 0;
+        // 初始化固定項目（從保險箱讀取）
+        let fixedData = JSON.parse(localStorage.getItem('dreamFixedData')) || [
+            { label: "🐾 孩子預備金", val: 3000 },
+            { label: "🚗 養車金", val: 2000 },
+            { label: "🏠 生活雜支費", val: 10000 }
+        ];
 
-        function editFixed(id, name) {
-            let newVal = prompt("請輸入新的「" + name + "」金額：", document.getElementById(id).innerText);
-            if (newVal !== null && !isNaN(newVal) && newVal !== "") {
-                document.getElementById(id).innerText = newVal;
+        function renderFixed() {
+            const list = document.getElementById('fixedList');
+            list.innerHTML = "";
+            fixedData.forEach((item, index) => {
+                list.innerHTML += `
+                    <div class="fixed-item">
+                        <span>${item.label}: $<span>${item.val}</span></span>
+                        <button class="pencil-btn" onclick="editFixed(${index})">✏️</button>
+                    </div>
+                `;
+            });
+            calculateBalance();
+        }
+
+        function editFixed(index) {
+            let newLabel = prompt("修改項目名稱：", fixedData[index].label);
+            if (newLabel) {
+                let newVal = prompt("修改「" + newLabel + "」的金額：", fixedData[index].val);
+                if (newVal !== null && !isNaN(newVal)) {
+                    fixedData[index].label = newLabel;
+                    fixedData[index].val = parseFloat(newVal);
+                    localStorage.setItem('dreamFixedData', JSON.stringify(fixedData));
+                    renderFixed();
+                }
+            }
+        }
+
+        function calculateBalance() {
+            let salary = parseFloat(document.getElementById('salaryInput').value) || 0;
+            let fixedTotal = fixedData.reduce((sum, item) => sum + item.val, 0);
+            let balance = salary - fixedTotal - currentExpenses;
+            document.getElementById('totalBalance').innerText = '$ ' + balance.toLocaleString();
+        }
+
+        function addExpense() {
+            let price = parseInt(document.getElementById('itemPrice').value) || 0;
+            if(price > 0) {
+                currentExpenses += price;
+                document.getElementById('itemPrice').value = '';
+                document.getElementById('itemName').value = '';
+                document.getElementById('pContainer').style.display = 'none';
                 calculateBalance();
+                alert('扣款成功！');
             }
         }
 
@@ -107,26 +131,8 @@
             }
         }
 
-        function calculateBalance() {
-            let salary = parseFloat(document.getElementById('salaryInput').value) || 0;
-            let f1 = parseFloat(document.getElementById('val1').innerText) || 0;
-            let f2 = parseFloat(document.getElementById('val2').innerText) || 0;
-            let f3 = parseFloat(document.getElementById('val3').innerText) || 0;
-            let balance = salary - (f1 + f2 + f3) - currentExpenses;
-            document.getElementById('totalBalance').innerText = '$ ' + balance.toLocaleString();
-        }
-
-        function addExpense() {
-            let price = parseInt(document.getElementById('itemPrice').value) || 0;
-            if(price > 0) {
-                currentExpenses += price;
-                document.getElementById('itemPrice').value = '';
-                document.getElementById('itemName').value = '';
-                document.getElementById('pContainer').style.display = 'none';
-                calculateBalance();
-                alert('扣款成功！');
-            }
-        }
+        // 初始渲染
+        renderFixed();
     </script>
 </body>
 </html>
