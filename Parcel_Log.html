@@ -3,122 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">智慧物流登記平台</title>
+    <title id="pageTitle">台灣精銳包裹登記平台</title>
     <style>
-        :root { --primary-color: #1a73e8; --bg-color: #f8f9fa; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 600px; width: 100%; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .header-section { text-align: center; margin-bottom: 20px; }
-        h2 { color: #333; margin: 5px 0; }
-        .rename-btn { font-size: 12px; color: var(--primary-color); cursor: pointer; text-decoration: underline; }
+        :root { --primary-color: #d32f2f; --bg-color: #f4f4f4; } /* 改成比較專業的紅色系 */
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg-color); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 700px; width: 100%; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .header-section { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
         .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
-        input:focus { border-color: var(--primary-color); }
-        button.add-btn { grid-column: span 2; background: var(--primary-color); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; margin-top: 5px; }
-        button.add-btn:hover { background: #1557b0; }
-        .search-section { margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
-        .search-bar { width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 25px; box-sizing: border-box; margin-bottom: 15px; outline: none; font-size: 16px; }
-        .parcel-card { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .info b { font-size: 18px; color: #222; }
-        .info p { margin: 5px 0 0; color: #666; font-size: 14px; }
-        .status { padding: 8px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; min-width: 80px; text-align: center; }
-        .status.pending { background: #ffebee; color: #c62828; }
-        .status.done { background: #e8f5e9; color: #2e7d32; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+        .full-width { grid-column: span 2; }
+        button.add-btn { grid-column: span 2; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .search-bar { width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 5px; margin: 20px 0; box-sizing: border-box; }
+        .parcel-card { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .info b { font-size: 16px; }
+        .btn-group { display: flex; gap: 5px; }
+        .btn-mail { background: #ff9800; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .status { padding: 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center; min-width: 60px; }
+        .status.pending { background: #ffcdd2; color: #b71c1c; }
+        .status.done { background: #c8e6c9; color: #2e7d32; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-section">
-        <h2 id="mainTitle">智慧物流登記平台</h2>
-        <span class="rename-btn" onclick="renameSystem()">修改系統名稱</span>
+        <h2 id="mainTitle">台灣精銳包裹登記平台</h2>
     </div>
 
     <div class="input-group">
         <input type="text" id="dept" placeholder="單位名稱 (如: 業務部)">
         <input type="text" id="receiver" placeholder="收件人姓名">
+        <input type="email" id="email" placeholder="同事的 Email (必填)">
         <select id="type">
             <option value="一般包裹">📦 一般包裹</option>
             <option value="掛號信件">✉️ 掛號信件</option>
             <option value="低溫冷藏">❄️ 低溫冷藏</option>
-            <option value="外送美食">🛵 外送美食</option>
         </select>
         <input type="text" id="logistics" placeholder="物流公司 (如: 黑貓)">
-        <button class="add-btn" onclick="addParcel()">➕ 登記包裹進入系統</button>
+        <input type="text" id="note" placeholder="備註 (如: 代付100元)" class="full-width">
+        <button class="add-btn" onclick="addParcel()">➕ 登記並加入清單</button>
     </div>
 
-    <div class="search-section">
-        <input type="text" class="search-bar" id="searchBar" onkeyup="searchParcels()" placeholder="🔍 搜尋單位、姓名或物流公司...">
-        <div id="parcelList"></div>
-    </div>
+    <input type="text" class="search-bar" id="searchBar" onkeyup="searchParcels()" placeholder="🔍 快速搜尋...">
+    <div id="parcelList"></div>
 </div>
 
 <script>
     let parcels = [];
 
-    function renameSystem() {
-        const newName = prompt("請輸入新的系統名稱：", document.getElementById('mainTitle').innerText);
-        if (newName) {
-            document.getElementById('mainTitle').innerText = newName;
-            document.getElementById('pageTitle').innerText = newName;
-            localStorage.setItem('systemName', newName);
-        }
-    }
-
-    window.onload = function() {
-        const savedName = localStorage.getItem('systemName');
-        if (savedName) {
-            document.getElementById('mainTitle').innerText = savedName;
-            document.getElementById('pageTitle').innerText = savedName;
-        }
-        renderParcels();
-    };
-
     function addParcel() {
         const dept = document.getElementById('dept').value;
         const receiver = document.getElementById('receiver').value;
+        const email = document.getElementById('email').value;
         const type = document.getElementById('type').value;
         const logistics = document.getElementById('logistics').value;
+        const note = document.getElementById('note').value;
 
-        if (!dept || !receiver) {
-            alert("請填寫單位名稱與收件人！");
-            return;
-        }
+        if (!receiver || !email) { alert("姓名與 Email 為必填！"); return; }
 
         const newParcel = {
             id: Date.now(),
-            dept,
-            receiver,
-            type,
-            logistics,
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            dept, receiver, email, type, logistics, note,
+            time: new Date().toLocaleString(),
             status: 'pending'
         };
 
         parcels.unshift(newParcel);
-        document.getElementById('dept').value = '';
-        document.getElementById('receiver').value = '';
-        document.getElementById('logistics').value = '';
         renderParcels();
+    }
+
+    function sendEmail(id) {
+        const p = parcels.find(x => x.id === id);
+        const subject = encodeURIComponent(`[包裹到貨通知] 您好，您的 ${p.type} 已送達櫃台`);
+        const body = encodeURIComponent(`您好：\n\n您有一件來自 [${p.logistics}] 的 ${p.type} 已送達總機櫃台。\n登記時間：${p.time}\n備註：${p.note || '無'}\n\n請撥冗至櫃台領取，謝謝。`);
+        window.location.href = `mailto:${p.email}?subject=${subject}&body=${body}`;
     }
 
     function renderParcels(filter = '') {
         const list = document.getElementById('parcelList');
         list.innerHTML = '';
-        const filtered = parcels.filter(p => 
-            p.receiver.includes(filter) || p.dept.includes(filter) || p.logistics.includes(filter)
-        );
-
-        filtered.forEach(p => {
+        parcels.filter(p => p.receiver.includes(filter) || p.dept.includes(filter)).forEach(p => {
             const card = document.createElement('div');
             card.className = 'parcel-card';
             card.innerHTML = `
                 <div class="info">
                     <b>[${p.dept}] ${p.receiver}</b>
-                    <p>${p.type} | ${p.logistics} | ${p.time}</p>
+                    <p>${p.type} | ${p.logistics} <br> <small>${p.time}</small></p>
+                    ${p.note ? `<p style="color:red">📝 ${p.note}</p>` : ''}
                 </div>
-                <div class="status ${p.status}" onclick="toggleStatus(${p.id})">
-                    ${p.status === 'pending' ? '🔴 待領' : '🟢 已領'}
+                <div class="btn-group">
+                    <button class="btn-mail" onclick="sendEmail(${p.id})">📧 寄信</button>
+                    <div class="status ${p.status}" onclick="toggleStatus(${p.id})">
+                        ${p.status === 'pending' ? '待領' : '已領'}
+                    </div>
                 </div>
             `;
             list.appendChild(card);
@@ -126,9 +103,9 @@
     }
 
     function toggleStatus(id) {
-        const parcel = parcels.find(p => p.id === id);
-        parcel.status = parcel.status === 'pending' ? 'done' : 'pending';
-        renderParcels(document.getElementById('searchBar').value);
+        const p = parcels.find(x => x.id === id);
+        p.status = p.status === 'pending' ? 'done' : 'pending';
+        renderParcels();
     }
 
     function searchParcels() {
