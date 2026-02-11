@@ -1,30 +1,140 @@
-<div id="parcel-app">
-    <h2>📦 總機包裹守護者系統</h2>
-    
-    <input type="text" id="searchBar" placeholder="輸入姓名、樓層或單號搜尋...">
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">智慧物流登記平台</title>
+    <style>
+        :root { --primary-color: #1a73e8; --bg-color: #f8f9fa; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 600px; width: 100%; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .header-section { text-align: center; margin-bottom: 20px; }
+        h2 { color: #333; margin: 5px 0; }
+        .rename-btn { font-size: 12px; color: var(--primary-color); cursor: pointer; text-decoration: underline; }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary-color); }
+        button.add-btn { grid-column: span 2; background: var(--primary-color); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; margin-top: 5px; }
+        button.add-btn:hover { background: #1557b0; }
+        .search-section { margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
+        .search-bar { width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 25px; box-sizing: border-box; margin-bottom: 15px; outline: none; font-size: 16px; }
+        .parcel-card { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .info b { font-size: 18px; color: #222; }
+        .info p { margin: 5px 0 0; color: #666; font-size: 14px; }
+        .status { padding: 8px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; min-width: 80px; text-align: center; }
+        .status.pending { background: #ffebee; color: #c62828; }
+        .status.done { background: #e8f5e9; color: #2e7d32; }
+    </style>
+</head>
+<body>
 
-    <div class="input-group">
-        <input type="text" id="floor" placeholder="樓層/室號">
-        <input type="text" id="receiver" placeholder="收件人姓名">
-        <select id="type">
-            <option value="包裹">包裹</option>
-            <option value="掛號">掛號</option>
-            <option value="低溫">低溫</option>
-        </select>
-        <button onclick="addParcel()">➕ 登記存檔</button>
+<div class="container">
+    <div class="header-section">
+        <h2 id="mainTitle">智慧物流登記平台</h2>
+        <span class="rename-btn" onclick="renameSystem()">修改系統名稱</span>
     </div>
 
-    <table id="parcelTable">
-        <thead>
-            <tr>
-                <th>時間</th>
-                <th>收件人</th>
-                <th>類型</th>
-                <th>狀態</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="parcelList">
-            </tbody>
-    </table>
+    <div class="input-group">
+        <input type="text" id="dept" placeholder="單位名稱 (如: 業務部)">
+        <input type="text" id="receiver" placeholder="收件人姓名">
+        <select id="type">
+            <option value="一般包裹">📦 一般包裹</option>
+            <option value="掛號信件">✉️ 掛號信件</option>
+            <option value="低溫冷藏">❄️ 低溫冷藏</option>
+            <option value="外送美食">🛵 外送美食</option>
+        </select>
+        <input type="text" id="logistics" placeholder="物流公司 (如: 黑貓)">
+        <button class="add-btn" onclick="addParcel()">➕ 登記包裹進入系統</button>
+    </div>
+
+    <div class="search-section">
+        <input type="text" class="search-bar" id="searchBar" onkeyup="searchParcels()" placeholder="🔍 搜尋單位、姓名或物流公司...">
+        <div id="parcelList"></div>
+    </div>
 </div>
+
+<script>
+    let parcels = [];
+
+    function renameSystem() {
+        const newName = prompt("請輸入新的系統名稱：", document.getElementById('mainTitle').innerText);
+        if (newName) {
+            document.getElementById('mainTitle').innerText = newName;
+            document.getElementById('pageTitle').innerText = newName;
+            localStorage.setItem('systemName', newName);
+        }
+    }
+
+    window.onload = function() {
+        const savedName = localStorage.getItem('systemName');
+        if (savedName) {
+            document.getElementById('mainTitle').innerText = savedName;
+            document.getElementById('pageTitle').innerText = savedName;
+        }
+        renderParcels();
+    };
+
+    function addParcel() {
+        const dept = document.getElementById('dept').value;
+        const receiver = document.getElementById('receiver').value;
+        const type = document.getElementById('type').value;
+        const logistics = document.getElementById('logistics').value;
+
+        if (!dept || !receiver) {
+            alert("請填寫單位名稱與收件人！");
+            return;
+        }
+
+        const newParcel = {
+            id: Date.now(),
+            dept,
+            receiver,
+            type,
+            logistics,
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            status: 'pending'
+        };
+
+        parcels.unshift(newParcel);
+        document.getElementById('dept').value = '';
+        document.getElementById('receiver').value = '';
+        document.getElementById('logistics').value = '';
+        renderParcels();
+    }
+
+    function renderParcels(filter = '') {
+        const list = document.getElementById('parcelList');
+        list.innerHTML = '';
+        const filtered = parcels.filter(p => 
+            p.receiver.includes(filter) || p.dept.includes(filter) || p.logistics.includes(filter)
+        );
+
+        filtered.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'parcel-card';
+            card.innerHTML = `
+                <div class="info">
+                    <b>[${p.dept}] ${p.receiver}</b>
+                    <p>${p.type} | ${p.logistics} | ${p.time}</p>
+                </div>
+                <div class="status ${p.status}" onclick="toggleStatus(${p.id})">
+                    ${p.status === 'pending' ? '🔴 待領' : '🟢 已領'}
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function toggleStatus(id) {
+        const parcel = parcels.find(p => p.id === id);
+        parcel.status = parcel.status === 'pending' ? 'done' : 'pending';
+        renderParcels(document.getElementById('searchBar').value);
+    }
+
+    function searchParcels() {
+        renderParcels(document.getElementById('searchBar').value);
+    }
+</script>
+
+</body>
+</html>
