@@ -1,0 +1,30 @@
+<div id="parcel-app">
+    <h2>📦 總機包裹守護者系統</h2>
+    
+    <input type="text" id="searchBar" placeholder="輸入姓名、樓層或單號搜尋...">
+
+    <div class="input-group">
+        <input type="text" id="floor" placeholder="樓層/室號">
+        <input type="text" id="receiver" placeholder="收件人姓名">
+        <select id="type">
+            <option value="包裹">包裹</option>
+            <option value="掛號">掛號</option>
+            <option value="低溫">低溫</option>
+        </select>
+        <button onclick="addParcel()">➕ 登記存檔</button>
+    </div>
+
+    <table id="parcelTable">
+        <thead>
+            <tr>
+                <th>時間</th>
+                <th>收件人</th>
+                <th>類型</th>
+                <th>狀態</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="parcelList">
+            </tbody>
+    </table>
+</div>
