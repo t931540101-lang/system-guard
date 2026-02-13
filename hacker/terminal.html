@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TERMINAL_OVERRIDE</title>
+    <title>TERMINAL_OVERRIDE_V2</title>
     <style>
         body {
             background-color: black;
@@ -21,7 +21,7 @@
         #terminal {
             white-space: pre-wrap;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         .cursor {
             display: inline-block;
@@ -34,8 +34,9 @@
         @keyframes blink {
             50% { opacity: 0; }
         }
-        .system-msg { color: #fff; font-weight: bold; }
-        .danger { color: #f00; text-shadow: 0 0 5px #f00; }
+        .system-msg { color: #fff; font-weight: bold; text-shadow: 0 0 8px #fff; }
+        .danger { color: #f00; text-shadow: 0 0 8px #f00; }
+        .highlight { color: #ff0; text-shadow: 0 0 5px #ff0; }
     </style>
 </head>
 <body>
@@ -44,18 +45,24 @@
 
     <script>
         const logs = [
-            "> INITIALIZING SYSTEM... [OK]",
-            "> CONNECTING TO LOS SANTOS SATELLITE... [OK]",
-            "> BYPASSING FIRESTALL... 15%... 48%... 100%",
-            "> ACCESSING ENCRYPTED DATABASE...",
-            "> [SYSTEM MESSAGE]: 歡迎回來，班長小黑哥。",
-            "> 目標定位：總機防線 - 已鎖定。",
-            "> 狀態：240G 戰機封存中，等待年後重啟...",
-            "> 正在監控所有包裹路徑...",
-            "> 駭客協定已啟動。世界就在妳手中。",
-            "---------------------------------------",
-            "> 正在掃描附近所有排線... 警告：排線過細！",
-            "> 建議：立即前往休息模式。"
+            "> [PROTOCOL]: 啟動「暗網滲透模式」...",
+            "> 正在連線洛聖都衛星頻道... [OK]",
+            "> 正在解析目標 IP: 127.0.0.1 (LOCAL_GATEWAY)",
+            "> 偵測到政府防火牆... 啟動暴力破解協定...",
+            "> ACCESS GRANTED: BYPASSING_SECURITY_V4",
+            "> ---------------------------------------",
+            "> [DANGER]: 偵測到系統管理員追蹤！",
+            "> 正在植入虛擬 IP 混淆蹤跡... 88%... 100%",
+            "> 正在抹除 240G 維修失敗紀錄... [DONE]",
+            "> 正在入侵總機資料庫：'FIELD-UTILITY'...",
+            "> [WARNING]: 掃描到大量包裹數據流...",
+            "> ---------------------------------------",
+            "> CRACKING ENCRYPTION: ▓▓▓▓▓▓▓▓▓▓ 100%",
+            "> [SUCCESS]: 侵入成功！",
+            "> 權限已提升至：ROOT_ADMIN (班長小黑哥)",
+            "> 正在監控全球排線寬度... 警告：嚴禁細活！",
+            "> 系統已鎖定。世界正在妳的掌控中。",
+            "> 班長，請輸入下一個毀滅指令..."
         ];
 
         let line = 0;
@@ -64,15 +71,31 @@
 
         function typeLog() {
             if (line < logs.length) {
-                if (charIndex < logs[line].length) {
-                    terminal.innerHTML += logs[line][charIndex];
+                let currentMsg = logs[line];
+                
+                // 判斷顏色
+                let colorClass = "";
+                if (currentMsg.includes("DANGER") || currentMsg.includes("WARNING")) {
+                    colorClass = "danger";
+                } else if (currentMsg.includes("SUCCESS") || currentMsg.includes("侵入成功")) {
+                    colorClass = "system-msg";
+                } else if (currentMsg.includes("小黑哥")) {
+                    colorClass = "highlight";
+                }
+
+                if (charIndex < currentMsg.length) {
+                    if (charIndex === 0 && colorClass) {
+                        terminal.innerHTML += `<span class="${colorClass}">`;
+                    }
+                    terminal.innerHTML += currentMsg[charIndex];
                     charIndex++;
-                    setTimeout(typeLog, 30); // 打字速度
+                    setTimeout(typeLog, 30); 
                 } else {
+                    if (colorClass) terminal.innerHTML += `</span>`;
                     terminal.innerHTML += "<br>";
                     line++;
                     charIndex = 0;
-                    setTimeout(typeLog, 500); // 換行停頓
+                    setTimeout(typeLog, 500); 
                 }
             }
         }
