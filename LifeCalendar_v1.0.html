@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>班長的生活掛曆 V2</title>
+    <title>班長生活掛曆 V3</title>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -14,73 +14,71 @@
         body { margin: 0; font-family: sans-serif; background: #f5f5f5; -webkit-tap-highlight-color: transparent; }
         .calendar-box {
             max-width: 500px; margin: 0 auto; background: white; min-height: 100vh;
-            display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; position: relative;
         }
-        header { background: #2e5a44; color: white; padding: 20px; text-align: center; }
+        header { background: #2e5a44; color: white; padding: 15px; text-align: center; }
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--line-color); }
         .cell {
-            height: 100px; border-right: 1px solid var(--line-color); border-bottom: 1px solid var(--line-color);
-            position: relative; padding: 5px; cursor: pointer; overflow: hidden;
+            height: 110px; border-right: 1px solid var(--line-color); border-bottom: 1px solid var(--line-color);
+            position: relative; padding: 5px; cursor: pointer; display: flex; flex-direction: column;
         }
-        .day-num { font-size: 1.2rem; font-weight: bold; }
-        .lunar { font-size: 0.7rem; color: #888; }
+        .day-num { font-size: 1.1rem; font-weight: bold; }
+        .lunar { font-size: 0.65rem; color: #999; margin-bottom: 2px; }
         
-        /* 修正紅框框 */
-        .today { border: 3px solid var(--red-focus) !important; border-radius: 4px; box-sizing: border-box; }
-        
-        /* 修正紅線方向：仿造照片中從左上往右下的方向 */
-        .done::after {
-            content: ""; position: absolute; top: 20%; left: 10%; width: 100%; height: 3px;
-            background: rgba(211, 47, 47, 0.7); transform: rotate(15deg); /* 調整角度順著手勢 */
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        /* 格子內的記事文字 */
+        .memo-text {
+            font-size: 0.8rem; color: #2e5a44; font-weight: bold;
+            word-break: break-all; line-height: 1.1; margin-top: 2px;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
         }
 
-        /* 小鉛筆按鈕 */
+        .today { border: 3px solid var(--red-focus) !important; z-index: 5; box-sizing: border-box; }
+        
+        /* 瀟灑紅線：從左上往右下 */
+        .done::after {
+            content: ""; position: absolute; top: 15%; left: 0; width: 120%; height: 3px;
+            background: rgba(211, 47, 47, 0.7); transform: rotate(15deg); pointer-events: none;
+        }
+
         .pencil {
-            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
+            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
             background: #2e5a44; border-radius: 50%; color: white;
-            display: flex; justify-content: center; align-items: center; font-size: 30px;
+            display: flex; justify-content: center; align-items: center; font-size: 28px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 100;
         }
         
-        /* 快捷選單：加入編輯感 */
         #menu {
-            display: none; position: fixed; bottom: 110px; right: 30px;
+            display: none; position: fixed; bottom: 100px; right: 30px;
             background: white; padding: 10px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-            z-index: 99; min-width: 120px;
+            z-index: 99;
         }
-        .btn { 
-            padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between;
-            font-size: 16px; color: var(--text-dark);
-        }
-        .btn:last-child { border-bottom: none; }
-        .btn span { flex-grow: 1; }
-        .edit-icon { font-size: 12px; color: #aaa; margin-left: 10px; }
+        .btn { padding: 12px 20px; border-bottom: 1px solid #eee; font-size: 16px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="calendar-box">
     <header>
-        <div style="font-size: 26px; letter-spacing: 2px;">二月 FEBRUARY</div>
-        <div style="font-size: 16px; margin-top: 5px;">乙巳年臘月廿六</div>
+        <div style="font-size: 22px;">二月 FEBRUARY</div>
+        <div id="lunar-main" style="font-size: 14px; opacity: 0.8;">乙巳年臘月廿六</div>
     </header>
     <div class="grid" id="calendarGrid">
-        <div style="text-align:center; padding: 10px; color:#999; font-size: 12px;">日</div>
-        <div style="text-align:center; padding: 10px; color:#999; font-size: 12px;">一</div>
-        <div style="text-align:center; padding: 10px; color:#999; font-size: 12px;">二</div>
-        <div style="text-align:center; padding: 10px; color:#999; font-size: 12px;">三</div>
-        <div style="text-align:center; padding: 10px; color:#999; font-size: 12px;">四</div>
-        <div style="text-align:center; padding: 10px; color:#999; font-size: 12px;">五</div>
-        <div style="text-align:center; padding: 10px; color:#999; font-size: 12px;">六</div>
+        <div class="weekday" style="text-align:center; padding: 5px; color:#999; font-size:12px;">日</div>
+        <div class="weekday" style="text-align:center; padding: 5px; color:#999; font-size:12px;">一</div>
+        <div class="weekday" style="text-align:center; padding: 5px; color:#999; font-size:12px;">二</div>
+        <div class="weekday" style="text-align:center; padding: 5px; color:#999; font-size:12px;">三</div>
+        <div class="weekday" style="text-align:center; padding: 5px; color:#999; font-size:12px;">四</div>
+        <div class="weekday" style="text-align:center; padding: 5px; color:#999; font-size:12px;">五</div>
+        <div class="weekday" style="text-align:center; padding: 5px; color:#999; font-size:12px;">六</div>
     </div>
 </div>
 
 <div id="menu">
-    <div class="btn" onclick="editItem(this)"><span>🏮 拜拜</span><i class="edit-icon">改</i></div>
-    <div class="btn" onclick="editItem(this)"><span>📦 領貨</span><i class="edit-icon">改</i></div>
-    <div class="btn" onclick="editItem(this)"><span>💊 吃藥</span><i class="edit-icon">改</i></div>
-    <div class="btn" onclick="editItem(this)"><span>🔧 維修</span><i class="edit-icon">改</i></div>
+    <div class="btn" onclick="quickAdd('🏮 拜拜')">🏮 拜拜</div>
+    <div class="btn" onclick="quickAdd('📦 領貨')">📦 領貨</div>
+    <div class="btn" onclick="quickAdd('💊 吃藥')">💊 吃藥</div>
+    <div class="btn" onclick="quickAdd('🔧 維修')">🔧 維修</div>
+    <div class="btn" onclick="clearAll()" style="color: red; border: none;">🔥 全部清除</div>
 </div>
 
 <div class="pencil" onclick="toggleMenu()">✎</div>
@@ -88,22 +86,43 @@
 <script>
     const grid = document.getElementById('calendarGrid');
     const todayDate = new Date().getDate();
+    let selectedCell = null;
 
-    // 生成日曆格子
+    // 初始化：生成 28 天
     for (let i = 1; i <= 28; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
-        if (i === todayDate) cell.classList.add('today'); 
+        if (i === todayDate) cell.classList.add('today');
         
-        cell.innerHTML = `<div class="day-num">${i}</div><div class="lunar">臘月</div>`;
-        
-        // 點擊劃掉功能（現在紅線方向對了！）
-        cell.onclick = function(e) {
-            if(e.target.closest('#menu')) return;
-            this.classList.toggle('done');
-        };
+        // 從備忘錄讀取內容
+        const savedNote = localStorage.getItem('note-' + i) || "";
+        const isDone = localStorage.getItem('done-' + i) === "true";
+        if(isDone) cell.classList.add('done');
+
+        cell.innerHTML = `
+            <div class="day-num" onclick="toggleDone(event, ${i}, this.parentElement)">${i}</div>
+            <div class="lunar">臘月</div>
+            <div class="memo-text" onclick="editNote(${i}, this)">${savedNote}</div>
+        `;
         
         grid.appendChild(cell);
+    }
+
+    // 點擊數字：劃掉日子
+    function toggleDone(e, day, cell) {
+        e.stopPropagation();
+        cell.classList.toggle('done');
+        localStorage.setItem('done-' + day, cell.classList.contains('done'));
+    }
+
+    // 點擊文字區：自由編輯內容
+    function editNote(day, el) {
+        const oldText = el.innerText;
+        const newText = prompt("這天要做什麼？", oldText);
+        if (newText !== null) {
+            el.innerText = newText;
+            localStorage.setItem('note-' + day, newText);
+        }
     }
 
     function toggleMenu() {
@@ -111,12 +130,18 @@
         menu.style.display = (menu.style.display === 'block' ? 'none' : 'block');
     }
 
-    // 編輯功能：點擊後跳出輸入框更改文字
-    function editItem(el) {
-        const span = el.querySelector('span');
-        const newText = prompt("想要改成什麼？", span.innerText);
-        if (newText !== null && newText !== "") {
-            span.innerText = newText;
+    // 快捷選單：如果要用選單加到「今天」
+    function quickAdd(text) {
+        const todayTextEl = document.querySelector('.today .memo-text');
+        todayTextEl.innerText = text;
+        localStorage.setItem('note-' + todayDate, text);
+        toggleMenu();
+    }
+
+    function clearAll() {
+        if(confirm("確定要清除所有記事嗎？")) {
+            localStorage.clear();
+            location.reload();
         }
     }
 </script>
