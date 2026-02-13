@@ -4,44 +4,63 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>班長排班神器 V4.7</title>
+    <title>班長專屬·和風掛曆</title>
     <style>
-        :root { --bg-color: #ffffff; --line-color: #e0e0e0; --red-focus: #d32f2f; --theme: #2e5a44; }
-        body { margin: 0; font-family: sans-serif; background: #f5f5f5; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        .calendar-box { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; padding-bottom: 120px; }
-        header { background: var(--theme); color: white; padding: 15px 10px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        :root { 
+            --paper: #f9f4e8; /* 溫潤和紙色 */
+            --ink: #2e5a44;   /* 質感墨綠 */
+            --red: #c0392b;   /* 硃砂紅 */
+            --line: #dcd3b6;  /* 舊紙線條色 */
+        }
+        body { margin: 0; font-family: "PingFang TC", sans-serif; background: #e8e2d0; -webkit-tap-highlight-color: transparent; }
+        .calendar-box { max-width: 500px; margin: 0 auto; background: var(--paper); min-height: 100vh; padding-bottom: 120px; box-shadow: 0 0 30px rgba(0,0,0,0.1); }
+        
+        header { background: var(--ink); color: #fff; padding: 20px 10px; text-align: center; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid #1e3d2e; }
         .header-nav { display: flex; justify-content: space-between; align-items: center; }
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--line-color); width: 100%; }
-        .weekday { text-align: center; padding: 10px 0; color: #555; font-size: 13px; background: #fafafa; font-weight: bold; border-bottom: 1px solid var(--line-color); }
-        .cell { min-height: 130px; border-right: 1px solid var(--line-color); border-bottom: 1px solid var(--line-color); position: relative; padding: 4px 1px; cursor: pointer; display: flex; flex-direction: column; background: #fff; overflow: hidden; box-sizing: border-box; }
-        .day-num { font-size: 1.2rem; font-weight: bold; margin-left: 2px; }
         
-        /* 核心修正：使用 vw 單位讓字體隨螢幕寬度自動縮放，保證不切邊 */
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--line); }
+        .weekday { text-align: center; padding: 12px 0; color: #8e835d; font-size: 13px; background: #f0e9d2; font-weight: bold; border-bottom: 1px solid var(--line); }
+        
+        .cell { 
+            min-height: 140px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); 
+            position: relative; padding: 6px 2px; cursor: pointer; display: flex; flex-direction: column; 
+            background: var(--paper); transition: background 0.2s;
+        }
+        .empty-cell { background-color: #f2ebd5; }
+        .day-num { font-size: 1.4rem; font-weight: bold; color: #4a4a4a; margin-left: 4px; }
+        
+        /* 今天的高亮：紅框加呼吸感 */
+        .today { box-shadow: inset 0 0 0 4px var(--red); background: #fffcf5; z-index: 10; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
         .memo-text { 
-            font-size: 4.2vw; /* 隨螢幕寬度縮放 */
-            max-font-size: 18px; /* 電腦版不會無限大 */
-            color: var(--theme); 
-            font-weight: 900; 
-            text-align: center; 
-            margin: auto 0;
-            white-space: nowrap; 
-            letter-spacing: -1.5px; /* 進一步縮小字距 */
-            width: 100%;
-            display: block;
+            font-size: 4.5vw; color: var(--ink); font-weight: 900; 
+            text-align: center; margin: auto 0; white-space: nowrap; 
+            letter-spacing: -1.5px; width: 100%; text-shadow: 0.5px 0.5px 0px rgba(255,255,255,0.5);
         }
 
-        /* 針對桌機/大螢幕的調整 */
-        @media (min-width: 500px) {
-            .memo-text { font-size: 1.2rem; letter-spacing: -0.5px; }
-        }
+        @media (min-width: 500px) { .memo-text { font-size: 1.3rem; } }
         
-        .today { box-shadow: inset 0 0 0 4px var(--red-focus); }
-        .done::after { content: ""; position: absolute; top: 30%; left: -5%; width: 110%; height: 5px; background: rgba(211, 47, 47, 0.7); transform: rotate(10deg); pointer-events: none; }
+        /* 瀟灑紅線 */
+        .done::after { 
+            content: ""; position: absolute; top: 35%; left: -5%; width: 115%; height: 6px; 
+            background: rgba(192, 57, 43, 0.6); transform: rotate(10deg); pointer-events: none; 
+            border-radius: 10px;
+        }
 
-        /* 工具列美化 */
-        .toolbar { position: fixed; bottom: 0; left: 0; width: 100%; background: #f8f8f8; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -3px 15px rgba(0,0,0,0.1); z-index: 200; border-top: 1px solid #ddd; }
-        .stamp-btn { padding: 10px 5px; background: white; border-radius: 10px; font-weight: bold; border: 1.5px solid #ccc; font-size: 13px; width: 22%; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .active-stamp { border-color: var(--theme); background: var(--theme); color: white; box-shadow: 0 0 8px rgba(46,90,68,0.4); }
+        /* 下方工具列美化 */
+        .toolbar { 
+            position: fixed; bottom: 0; left: 0; width: 100%; background: #f2ebd5; 
+            display: flex; justify-content: space-around; padding: 15px 0; 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 200; border-top: 2px solid var(--line);
+        }
+        .stamp-btn { 
+            padding: 12px 5px; background: #fff; border-radius: 12px; font-weight: bold; 
+            border: 1.5px solid var(--line); font-size: 14px; width: 22%; text-align: center;
+            color: #5d5437; box-shadow: 0 3px 0 var(--line);
+        }
+        .stamp-btn:active { transform: translateY(2px); box-shadow: none; }
+        .active-stamp { border-color: var(--ink); background: var(--ink); color: #fff; box-shadow: 0 3px 0 #1e3d2e; }
     </style>
 </head>
 <body>
@@ -49,9 +68,9 @@
 <div class="calendar-box">
     <header>
         <div class="header-nav">
-            <div onclick="changeMonth(-1)" style="font-size:28px; width:45px; cursor:pointer;">❮</div>
-            <div id="calendar-title" style="font-size: 22px; font-weight: bold;">2026年 3月</div>
-            <div onclick="changeMonth(1)" style="font-size:28px; width:45px; cursor:pointer;">❯</div>
+            <div onclick="changeMonth(-1)" style="font-size:30px; width:50px; cursor:pointer;">❮</div>
+            <div id="calendar-title" style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">2026年 3月</div>
+            <div onclick="changeMonth(1)" style="font-size:30px; width:50px; cursor:pointer;">❯</div>
         </div>
     </header>
     <div class="grid" id="calendarGrid">
@@ -64,7 +83,7 @@
     <div class="stamp-btn" onclick="setStamp('日B班', this)">日B班</div>
     <div class="stamp-btn" onclick="setStamp('夜B班', this)">夜B班</div>
     <div class="stamp-btn" onclick="setStamp('休假', this)">休假</div>
-    <div class="stamp-btn" onclick="setStamp('CLEAR', this)" style="color:#d32f2f;">擦除</div>
+    <div class="stamp-btn" onclick="setStamp('CLEAR', this)" style="color:var(--red);">擦除</div>
 </div>
 
 <script>
@@ -106,7 +125,7 @@
             
             cell.onclick = () => {
                 if (!activeStamp) {
-                    const newText = prompt("手動輸入：", note);
+                    const newText = prompt("手動記事：", note);
                     if (newText !== null) save(dateKey, newText, null);
                 } else if (activeStamp === 'CLEAR') {
                     save(dateKey, "", false);
@@ -114,12 +133,13 @@
                     save(dateKey, activeStamp, null);
                 }
             };
-            // 加上長按劃掉功能
-            cell.oncontextmenu = (e) => {
-                e.preventDefault();
+            // 手機長按劃掉功能
+            let timer;
+            cell.ontouchstart = () => { timer = setTimeout(() => { 
                 const isDone = localStorage.getItem('done-' + dateKey) === "true";
                 save(dateKey, null, !isDone);
-            };
+            }, 600); };
+            cell.ontouchend = () => { clearTimeout(timer); };
             grid.appendChild(cell);
         }
     }
@@ -136,7 +156,6 @@
         else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
         renderCalendar();
     }
-
     window.onload = renderCalendar;
 </script>
 </body>
