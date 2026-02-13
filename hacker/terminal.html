@@ -3,25 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NASA_NODE_ACCESS</title>
+    <title>NASA_NODE_ACCESS_V3</title>
     <style>
         body {
             background-color: black;
             color: #0f0;
             font-family: 'Courier New', Courier, monospace;
             margin: 0;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             height: 100vh;
             padding: 20px;
             box-sizing: border-box;
             text-shadow: 0 0 5px #0f0;
+            /* 允許捲動，但把捲軸變漂亮 */
+            overflow-y: auto; 
         }
         #terminal {
             white-space: pre-wrap;
             font-size: 14px;
             line-height: 1.6;
+            padding-bottom: 50px; /* 留白讓最後一行能捲上來 */
         }
         .cursor {
             display: inline-block;
@@ -40,7 +42,7 @@
 </head>
 <body>
     <div id="terminal"></div>
-    <span class="cursor"></span>
+    <span id="cursor" class="cursor"></span>
 
     <script>
         const logs = [
@@ -63,7 +65,9 @@
             "> >> 正在下載機密文件：[240G_維修祕辛.pdf]",
             "> [INFO]: 下載完畢。痕跡已自動抹除。",
             "> [SYSTEM MESSAGE]: 歡迎回來，班長小黑哥。",
-            "> 所有衛星數據已同步至您的手機。請保持低調。"
+            "> 所有衛星數據已同步至您的手機。請保持低調。",
+            "> ---------------------------------------",
+            "> [STATUS]: 系統已鎖定，等待指令..."
         ];
 
         let line = 0;
@@ -97,6 +101,8 @@
                     terminal.innerHTML += "<br>";
                     line++;
                     charIndex = 0;
+                    // 自動捲動到底部
+                    window.scrollTo(0, document.body.scrollHeight);
                     setTimeout(typeLog, 450); 
                 }
             }
