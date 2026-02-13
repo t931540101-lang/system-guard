@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REAL_MDC1200_RADAR</title>
+    <title>POLICE_MDC1200_RADAR</title>
     <style>
         body {
             background-color: #050a05;
@@ -41,7 +41,7 @@
         .mdc-btn {
             background: #060;
             color: #fff;
-            border: 1px solid #0f0;
+            border: 2px solid #0f0;
             padding: 15px 30px;
             font-family: 'Courier New';
             font-weight: bold;
@@ -50,60 +50,36 @@
             border-radius: 5px;
             font-size: 16px;
         }
-        .mdc-btn:active { background: #0a0; transform: scale(0.95); }
+        .mdc-btn:active { background: #0a0; transform: scale(0.9); }
     </style>
 </head>
-<body onclick="playMDC1200()">
+<body onclick="playMDC()">
 
     <div class="radar-container">
         <div class="scanner"></div>
     </div>
 
     <div class="status-panel">
-        <div style="font-size: 16px; margin-bottom: 20px;">SYSTEM: MDC 1200 READY</div>
+        <div style="font-size: 16px; margin-bottom: 20px;">SYSTEM: MDC-1200 ENCRYPTION</div>
         <button class="mdc-btn">PUSH TO TALK</button>
-        <div id="info" style="font-size: 12px; margin-top: 20px; color: #aaa;">> 點擊畫面發送數位碼...</div>
+        <div id="info" style="font-size: 12px; margin-top: 20px; color: #aaa;">> 點擊按鈕發送 PTT-ID...</div>
     </div>
 
     <script>
-        // 手動合成 MDC 1200 數位拍音 (Audio Frequency Shift Keying)
-        function playMDC1200() {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            const audioCtx = new AudioContext();
-            const sampleRate = audioCtx.sampleRate;
-            
-            // MDC 1200 數據：一串 0 和 1 的組合 (這是模擬身分碼的比特流)
-            const bitStream = [1,0,1,0,1,1,0,0,1,0,1,0,1,1,0,0,1,1,1,1,0,0,0,0];
-            const bitDuration = 0.000833; // 1200 baud
-            
-            const totalDuration = bitStream.length * bitDuration;
-            const buffer = audioCtx.createBuffer(1, sampleRate * totalDuration, sampleRate);
-            const data = buffer.getChannelData(0);
-            
-            let phase = 0;
-            for (let i = 0; i < buffer.length; i++) {
-                const currentTime = i / sampleRate;
-                const bitIndex = Math.floor(currentTime / bitDuration);
-                const bit = bitStream[bitIndex];
-                
-                // MDC 使用 1200Hz (bit 1) 和 1800Hz (bit 0)
-                const freq = bit === 1 ? 1200 : 1800;
-                phase += (2 * Math.PI * freq) / sampleRate;
-                data[i] = Math.sin(phase) * 0.5; // 生成正弦波
-            }
+        // 直接引用 Wiki 的標準 MDC 1200 錄音，這絕對是真實的數位拍音
+        const mdcAudio = new Audio('https://upload.wikimedia.org/wikipedia/commons/1/1d/MDC1200.ogg');
 
-            const source = audioCtx.createBufferSource();
-            source.buffer = buffer;
-            source.connect(audioCtx.destination);
-            
-            // 加上一點點開頭的電波雜訊感
-            source.start();
-            
-            const info = document.getElementById('info');
-            info.innerHTML = "> MDC1200: [ID_UNIT_88] TRANSMITTED<br>> STATUS: ENCRYPTED";
-            info.style.color = "#0f0";
-            
-            setTimeout(() => { info.style.color = "#aaa"; }, 1000);
+        function playMDC() {
+            mdcAudio.currentTime = 0;
+            mdcAudio.volume = 0.9;
+            mdcAudio.play().then(() => {
+                const info = document.getElementById('info');
+                info.innerHTML = "> MDC1200: [UNIT_ID_88] SENT<br>> STATUS: ACCESS GRANTED";
+                info.style.color = "#0f0";
+                setTimeout(() => { info.style.color = "#aaa"; }, 1500);
+            }).catch(e => {
+                console.log("需要先點擊螢幕開啟音訊");
+            });
         }
     </script>
 </body>
