@@ -3,42 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MDC1200_ULTIMATE</title>
+    <title>MDC1200_PREAMBLE_RADAR</title>
     <style>
         body { background-color: #050a05; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; font-family: 'Courier New', monospace; color: #0f0; }
         .radar-container { position: relative; width: 280px; height: 280px; border: 2px solid #0f0; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,0,0.1) 0%, #000 80%); box-shadow: 0 0 20px #0f04; }
         .scanner { position: absolute; top: 50%; left: 50%; width: 140px; height: 140px; background: conic-gradient(from 0deg, #0f08 0%, transparent 25%); border-radius: 100% 0 0 0; transform-origin: top left; animation: scan 3s linear infinite; }
         @keyframes scan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .mdc-btn { margin-top: 30px; background: #060; color: #fff; border: 2px solid #0f0; padding: 15px 30px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px #0f0; border-radius: 5px; font-size: 18px; text-transform: uppercase; }
-        .mdc-btn:active { background: #0a0; transform: scale(0.9); }
+        .mdc-btn:active { background: #0a0; transform: scale(0.95); }
     </style>
 </head>
-<body onclick="playMDC()">
+<body onclick="playPreamble()">
 
     <div class="radar-container">
         <div class="scanner"></div>
     </div>
 
     <div class="status-panel" style="text-align: center;">
-        <p id="status">> SYSTEM_STANDBY</p>
+        <p id="status">> SYSTEM_READY_MDC1200</p>
         <button class="mdc-btn">Push To Talk</button>
-        <p style="font-size: 10px; color: #5f5; margin-top: 10px;">[ 🔊 請確認靜音開關已關閉 ]</p>
+        <p style="font-size: 10px; color: #5f5; margin-top: 15px; opacity: 0.7;">[ 🔊 點擊螢幕發送前置拍碼 ]</p>
     </div>
 
     <script>
-        // 柔把錄音檔直接「電漿化」成代碼了！這就是那聲靈魂顆顆音
-        // 這是一個 0.5 秒的真實 MDC 1200 錄音採樣
-        const mdcSoundBase64 = "data:audio/mp3;base64,SUQzBAAAAAABAFRYWFgAAAASAAADbWFqb3JfYnJhbmQAZGFzaABUWFhYAAAAEQAAA21pbm9yX3ZlcnNpb24AMABUWFhYAAAAHAAAA2NvbXBhdGlibGVfYnJhbmRzAGlzbzZtcDQxAFRTU0UAAAAPAAADTGF2ZjYwLjEwMC4xMDAAAAAAAAAAAAAAAAD/80MUAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAALAAALuAAICAICAgICAgICDAwMDAwMDAwMDA4ODg4ODg4ODg4REREREREREREREZGRkZGRkZGRkZGRmZmZmZmZmZmZmZubm5ubm5ubm5ubn5+fn5+fn5+fn6GhoaGhoaGhoaGhowAAAAAAAAAAAAAAAAAAAAD/L01FVEYAAAAA/y9NRTREAAAAAP8vTVRBRwAAAAD/L01UUkMAAAAA/y9NV0ZNAAAAAAAAAP8vTXBCNAAAAAAAAAD/L01QTU0AAAAAAAAA/+7zQxQUAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxRsAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxSIAAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxSoAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxTIAAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxS8AAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxToAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxUIAAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxUoAAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/+7zQxVMAAAAAABpA9AIAAAMEI0KADGAAAInY9AAAAwQQgwYAMYAABEx7AAAAu/";
+        // 使用安全加密的真實 MDC-1200 錄音來源 (HTTPS)
+        const preambleSound = new Audio('https://www.sigidwiki.com/images/1/1d/MDC1200.mp3');
 
-        const mdcAudio = new Audio(mdcSoundBase64);
-
-        function playMDC() {
-            mdcAudio.currentTime = 0;
-            mdcAudio.play().then(() => {
-                document.getElementById('status').innerHTML = "> TRANSMITTING ID: 8845... OK";
+        function playPreamble() {
+            preambleSound.currentTime = 0;
+            preambleSound.volume = 1.0;
+            
+            // 點擊後撥放最正宗的「唧哩」聲
+            preambleSound.play().then(() => {
+                document.getElementById('status').innerHTML = "> [SENT]: PREAMBLE_DATA_LINK";
                 document.getElementById('status').style.color = "#0f0";
-            }).catch(err => {
-                console.log("Audio play failed: ", err);
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = "> SYSTEM_READY_MDC1200";
+                }, 1500);
+            }).catch(e => {
+                console.log("需點擊螢幕以解鎖音訊");
             });
         }
     </script>
