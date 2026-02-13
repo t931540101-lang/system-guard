@@ -3,45 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MDC1200_FINAL_V5</title>
+    <title>MDC1200_LONG_SHOT</title>
     <style>
         body { background-color: #050a05; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; font-family: 'Courier New', monospace; color: #0f0; }
         .radar-container { position: relative; width: 280px; height: 280px; border: 2px solid #0f0; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,0,0.1) 0%, #000 80%); box-shadow: 0 0 20px #0f04; }
         .scanner { position: absolute; top: 50%; left: 50%; width: 140px; height: 140px; background: conic-gradient(from 0deg, #0f08 0%, transparent 25%); border-radius: 100% 0 0 0; transform-origin: top left; animation: scan 3s linear infinite; }
         @keyframes scan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .status-panel { margin-top: 30px; text-align: center; }
-        .mdc-btn { background: #060; color: #fff; border: 2px solid #0f0; padding: 15px 30px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px #0f0; border-radius: 5px; font-size: 18px; }
-        .mdc-btn:active { background: #0a0; transform: scale(0.9); }
+        .mdc-btn { background: #060; color: #fff; border: 2px solid #0f0; padding: 15px 30px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px #0f0; border-radius: 5px; font-size: 18px; letter-spacing: 2px; }
+        .mdc-btn:active { background: #0a0; transform: scale(0.95); }
     </style>
 </head>
-<body onclick="playMDC1200()">
+<body onclick="playLongShotMDC()">
 
     <div class="radar-container">
         <div class="scanner"></div>
     </div>
 
     <div class="status-panel">
-        <div style="font-size: 16px; margin-bottom: 20px;">SYSTEM: MDC-1200 ENCRYPTED</div>
+        <div style="font-size: 16px; margin-bottom: 20px; color: #0f0;">STRATEGIC COMMS: MDC-1200</div>
         <button class="mdc-btn">PUSH TO TALK</button>
-        <div id="info" style="font-size: 12px; margin-top: 20px; color: #ff0;">[ 請點擊螢幕開啟音訊頻道 ]</div>
+        <div id="info" style="font-size: 12px; margin-top: 20px; color: #ff0;">[ 點擊發送靈魂顆顆音 ]</div>
     </div>
 
     <script>
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
 
-        function playMDC1200() {
+        function playLongShotMDC() {
             if (!audioCtx) audioCtx = new AudioContext();
             
             const startTime = audioCtx.currentTime;
             const bitDuration = 0.000833; // 1200 baud
-            // 模擬 MDC 1200 的前導碼與同步碼數據
-            const data = [1,0,1,0,1,1,0,0,1,0,1,1,0,1,0,0,1,1,0,1,0,1,1,0,0,1,0,1,0,1];
+            // 加長版的數據流，模擬長拍碼感 (Rear DOS)
+            const data = [1,0,1,0,1,0,1,0,1,1,0,0,1,1,0,0,1,0,1,0,1,1,1,1,0,0,0,0,1,1,0,0,1,0,1,0,1,1,0,1,0,1,0,1,1,0,1,0];
             
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
 
-            osc.type = 'square'; // 方波最有「顆顆」的碎裂感
+            // 使用 sawtooth (鋸齒波) 能產生更接近影片中那種粗糙的「顆顆」質地
+            osc.type = 'sawtooth'; 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
 
@@ -51,16 +52,17 @@
                 osc.frequency.setValueAtTime(freq, time);
             });
 
+            // 調整包絡線，讓聲音結尾帶有一點點噴氣感
             gain.gain.setValueAtTime(0, startTime);
-            gain.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
-            gain.gain.setValueAtTime(0.3, startTime + (data.length * bitDuration));
-            gain.gain.linearRampToValueAtTime(0, startTime + (data.length * bitDuration) + 0.01);
+            gain.gain.linearRampToValueAtTime(0.2, startTime + 0.005);
+            gain.gain.setValueAtTime(0.2, startTime + (data.length * bitDuration));
+            gain.gain.linearRampToValueAtTime(0, startTime + (data.length * bitDuration) + 0.02);
 
             osc.start(startTime);
             osc.stop(startTime + (data.length * bitDuration) + 0.05);
 
             const info = document.getElementById('info');
-            info.innerHTML = "> TRANSMITTING UNIT_ID: 0x240G<br>> STATUS: ENCRYPTED SUCCESS";
+            info.innerHTML = "> SENT: REAR_LONG_SHOT_CODE [UNIT_88]<br>> STATUS: DATA_BURST_SUCCESS";
             info.style.color = "#0f0";
         }
     </script>
