@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>台灣精銳 | 數位指揮中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; }
+        .hub-card { 
+            background: #1e293b; 
+            border: 2px solid #334155; 
+            transition: all 0.3s;
+            box-shadow: 6px 6px 0px #000;
+        }
+        .hub-card:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px #000; background: #334155; }
+        .accent-border { border-left: 6px solid #f97316; }
+    </style>
+</head>
+<body class="p-6">
+    <header className="mb-10 text-center">
+        <h1 class="text-3xl font-black tracking-tighter text-orange-500 mb-1">數位指揮中心</h1>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Taiwan Elite Field Utility Hub</p>
+        <div class="h-1 w-20 bg-orange-600 mx-auto mt-4 rounded-full"></div>
+    </header>
+
+    <div class="grid gap-6 max-w-md mx-auto">
+        <a href="duty_log.html" class="hub-card p-5 rounded-xl flex items-center accent-border">
+            <div class="text-3xl mr-5">📖</div>
+            <div>
+                <h2 class="text-xl font-black">勤務交接簿</h2>
+                <p class="text-xs text-slate-400 mt-1">每日重點、紅字警示、交接管理</p>
+            </div>
+        </a>
+
+        <a href="index.html" class="hub-card p-5 rounded-xl flex items-center accent-border">
+            <div class="text-3xl mr-5">📅</div>
+            <div>
+                <h2 class="text-xl font-black">霸氣排班表</h2>
+                <h2 class="text-xs text-slate-400 mt-1">巡邏班次、隊員排班、即時查詢</h2>
+            </div>
+        </a>
+
+        <a href="Parcel_Log.html" class="hub-card p-5 rounded-xl flex items-center accent-border">
+            <div class="text-3xl mr-5">📦</div>
+            <div>
+                <h2 class="text-xl font-black">包裹登記系統</h2>
+                <p class="text-xs text-slate-400 mt-1">廠區包裹、簽收紀錄、快速查詢</p>
+            </div>
+        </a>
+    </div>
+
+    <footer class="mt-16 text-center">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            指揮官：小黑哥 · 專屬裝備
+        </p>
+        <p class="text-[9px] text-slate-600 mt-2">V1.0 HQ INTERFACE</p>
+    </footer>
+</body>
+</html>
