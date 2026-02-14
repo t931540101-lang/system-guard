@@ -14,6 +14,8 @@
         .medical-paper { background: white; border: 2px solid #334155; box-shadow: 8px 8px 0px #cbd5e1; }
         .stamp { border: 3px solid #ef4444; color: #ef4444; transform: rotate(-15deg); font-weight: 900; padding: 2px 8px; border-radius: 4px; display: inline-block; font-size: 12px; }
         .record-row:hover { background-color: #f1f5f9; cursor: pointer; }
+        /* 強制長文字在手機上換行，不撐破格子 */
+        .break-word { word-break: break-all; }
     </style>
 </head>
 <body>
@@ -22,7 +24,6 @@
         const { useState, useEffect } = React;
 
         function App() {
-            // 1. 初始化 8 隻狗狗資料 (使用 V6 確保強制更新)
             const [dogs, setDogs] = useState(() => {
                 const saved = localStorage.getItem('K9_MEDICAL_PRO_V6');
                 return saved ? JSON.parse(saved) : [
@@ -37,12 +38,10 @@
                 ];
             });
 
-            // 2. 自動存檔功能
             useEffect(() => {
                 localStorage.setItem('K9_MEDICAL_PRO_V6', JSON.stringify(dogs));
             }, [dogs]);
 
-            // 3. 修改基本資料功能 (接回斷掉的線)
             const editBaseInfo = (dogId) => {
                 const dog = dogs.find(d => d.id === dogId);
                 const nName = prompt("修改名字:", dog.name);
@@ -50,83 +49,78 @@
                 const nAge = prompt("修改年齡:", dog.age);
                 const nWeight = prompt("修改體重 (KG):", dog.weight);
                 const nBreed = prompt("修改品種:", dog.breed);
-                
-                setDogs(dogs.map(d => d.id === dogId ? {
-                    ...d, 
-                    name: nName || d.name,
-                    sex: nSex || d.sex,
-                    age: nAge || d.age,
-                    weight: nWeight || d.weight,
-                    breed: nBreed || d.breed
-                } : d));
+                setDogs(dogs.map(d => d.id === dogId ? { ...d, name: nName || d.name, sex: nSex || d.sex, age: nAge || d.age, weight: nWeight || d.weight, breed: nBreed || d.breed } : d));
             };
 
-            // 4. 新增紀錄功能
             const addLog = (id) => {
                 const note = prompt("請輸入臨床診斷或用藥紀錄：");
                 if (!note) return;
-                setDogs(dogs.map(d => d.id === id ? { ...d, logs: [{ id: Date.now(), time: new Date().toLocaleString(), note }, ...d.logs] } : d));
+                // 優化時間顯示，強制換行
+                const now = new Date();
+                const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                setDogs(dogs.map(d => d.id === id ? { ...d, logs: [{ id: Date.now(), time: timeStr, note }, ...d.logs] } : d));
             };
 
-            // 5. 修改/刪除紀錄功能
             const editLog = (dogId, logId) => {
                 const dog = dogs.find(d => d.id === dogId);
                 const log = dog.logs.find(l => l.id === logId);
                 const action = prompt("請選擇操作：\n1. 修改紀錄\n2. 刪除紀錄");
-                
                 if (action === "1") {
                     const newNote = prompt("修改紀錄內容:", log.note);
-                    if (newNote) {
-                        setDogs(dogs.map(d => d.id === dogId ? { ...d, logs: d.logs.map(l => l.id === logId ? { ...l, note: newNote } : l) } : d));
-                    }
+                    if (newNote) setDogs(dogs.map(d => d.id === dogId ? { ...d, logs: d.logs.map(l => l.id === logId ? { ...l, note: newNote } : l) } : d));
                 } else if (action === "2") {
-                    if (confirm("確定刪除？")) {
-                        setDogs(dogs.map(d => d.id === dogId ? { ...d, logs: d.logs.filter(l => l.id !== logId) } : d));
-                    }
+                    if (confirm("確定刪除？")) setDogs(dogs.map(d => d.id === dogId ? { ...d, logs: d.logs.filter(l => l.id !== logId) } : d));
                 }
             };
 
             return (
-                <div className="p-4 max-w-4xl mx-auto">
+                <div className="p-2 max-w-4xl mx-auto">
                     <header className="flex justify-between items-end border-b-4 border-slate-800 pb-2 mb-6">
                         <div>
-                            <h1 className="text-3xl font-black tracking-tighter text-slate-800">台灣精銳犬隻 臨床病歷系統</h1>
-                            <p className="text-xs font-bold text-slate-500">照護護理師：小黑哥</p>
+                            <h1 className="text-xl md:text-3xl font-black tracking-tighter text-slate-800">台灣精銳犬隻 臨床病歷系統</h1>
+                            <p className="text-[10px] font-bold text-slate-500">照護護理師：小黑哥</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-xs font-mono font-bold uppercase">Clinical System v6.0</p>
+                            <p className="text-[10px] font-mono font-bold uppercase">v6.1 MobileFix</p>
                             <div className="stamp">已認證</div>
                         </div>
                     </header>
 
                     {dogs.map(dog => (
-                        <div key={dog.id} className="medical-paper p-6 mb-10 relative">
-                            <button onClick={() => editBaseInfo(dog.id)} className="absolute right-6 top-6 text-xl" title="編輯基本資料">✏️</button>
-                            <div className="grid grid-cols-4 border-2 border-slate-800 mb-4">
-                                <div className="bg-slate-800 text-white p-2 text-xs font-bold uppercase">病患姓名</div>
-                                <div className="p-2 border-r-2 border-slate-800 font-black text-blue-600">{dog.name}</div>
-                                <div className="bg-slate-800 text-white p-2 text-xs font-bold uppercase">目前體重</div>
-                                <div className="p-2 font-black">{dog.weight} KG</div>
-                                <div className="bg-slate-800 text-white p-2 text-xs font-bold uppercase border-t-2 border-slate-800">性別 / 年齡</div>
-                                <div className="p-2 border-r-2 border-slate-800 border-t-2 border-slate-800 font-bold">{dog.sex} / {dog.age}</div>
-                                <div className="bg-slate-800 text-white p-2 text-xs font-bold uppercase border-t-2 border-slate-800">品種</div>
-                                <div className="p-2 border-t-2 border-slate-800 font-bold">{dog.breed}</div>
+                        <div key={dog.id} className="medical-paper p-4 mb-8 relative">
+                            <button onClick={() => editBaseInfo(dog.id)} className="absolute right-4 top-4 text-lg" title="編輯基本資料">✏️</button>
+                            
+                            {/* 基本資料區：手機版字體微調 */}
+                            <div className="grid grid-cols-4 border-2 border-slate-800 mb-4 text-[13px]">
+                                <div className="bg-slate-800 text-white p-1 text-[10px] font-bold uppercase flex items-center justify-center">姓名</div>
+                                <div className="p-1 border-r-2 border-slate-800 font-black text-blue-600 truncate">{dog.name}</div>
+                                <div className="bg-slate-800 text-white p-1 text-[10px] font-bold uppercase flex items-center justify-center">體重</div>
+                                <div className="p-1 font-black">{dog.weight} KG</div>
+                                <div className="bg-slate-800 text-white p-1 text-[10px] font-bold uppercase border-t-2 border-slate-800 flex items-center justify-center">性別/年齡</div>
+                                <div className="p-1 border-r-2 border-slate-800 border-t-2 border-slate-800 font-bold text-center">{dog.sex}/{dog.age}</div>
+                                <div className="bg-slate-800 text-white p-1 text-[10px] font-bold uppercase border-t-2 border-slate-800 flex items-center justify-center">品種</div>
+                                <div className="p-1 border-t-2 border-slate-800 font-bold truncate">{dog.breed}</div>
                             </div>
 
-                            <div className="border-2 border-slate-800 min-h-[150px]">
-                                <div className="grid grid-cols-4 bg-slate-100 border-b-2 border-slate-800 font-bold text-sm">
-                                    <div className="p-2 border-r-2 border-slate-800 col-span-1">時間</div>
-                                    <div className="p-2 col-span-3">臨床診斷內容 (點擊修改)</div>
+                            {/* 診斷紀錄區：調整比例 30% : 70% */}
+                            <div className="border-2 border-slate-800 min-h-[120px]">
+                                <div className="flex bg-slate-100 border-b-2 border-slate-800 font-bold text-[12px]">
+                                    <div className="w-[30%] p-2 border-r-2 border-slate-800">診療時間</div>
+                                    <div className="w-[70%] p-2">臨床紀錄 (點擊修改)</div>
                                 </div>
                                 {dog.logs.map((log) => (
-                                    <div key={log.id} onClick={() => editLog(dog.id, log.id)} className="grid grid-cols-4 border-b border-slate-300 record-row text-sm">
-                                        <div className="p-2 border-r-2 border-slate-800 font-mono text-[11px] text-slate-500">{log.time}</div>
-                                        <div className="p-2 col-span-3 font-medium text-slate-800 italic">{log.note}</div>
+                                    <div key={log.id} onClick={() => editLog(dog.id, log.id)} className="flex border-b border-slate-300 record-row text-[13px] min-h-[50px]">
+                                        <div className="w-[30%] p-2 border-r-2 border-slate-800 font-mono text-[10px] text-slate-600 flex items-center break-all">
+                                            {log.time}
+                                        </div>
+                                        <div className="w-[70%] p-2 font-medium text-slate-800 italic break-word">
+                                            {log.note}
+                                        </div>
                                     </div>
                                 ))}
-                                {dog.logs.length === 0 && <div className="p-10 text-center text-slate-300 italic">尚無診療紀錄</div>}
+                                {dog.logs.length === 0 && <div className="p-8 text-center text-slate-300 italic text-sm">尚無診療紀錄</div>}
                             </div>
-                            <button onClick={() => addLog(dog.id)} className="mt-4 w-full bg-slate-800 text-white py-3 font-black text-sm hover:bg-emerald-600 transition-colors">
+                            <button onClick={() => addLog(dog.id)} className="mt-4 w-full bg-slate-800 text-white py-3 font-black text-sm active:bg-emerald-600 transition-colors">
                                 + 新增臨床紀錄 (ADD ENTRY)
                             </button>
                         </div>
