@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>班長指揮官 V7.3 - 名正言順版</title>
+    <title>班長指揮官 V7.4 - 資訊放大版</title>
     <style>
         :root { --paper: #f9f4e8; --ink: #2e5a44; --red: #c0392b; --gold: #b8860b; --line: #dcd3b6; }
         body { margin: 0; font-family: sans-serif; background: #e8e2d0; -webkit-tap-highlight-color: transparent; }
         .calendar-box { max-width: 500px; margin: 0 auto; background: var(--paper); min-height: 100vh; padding-bottom: 110px; }
         
-        /* 姓名工號回歸：放在標題上方，精簡化 */
-        .user-info-bar { background: #1a3327; color: #9bb1a5; padding: 4px 10px; font-size: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #142b20; }
+        /* 姓名工號放大加強 */
+        .user-info-bar { background: #1a3327; color: #ffffff; padding: 8px 12px; font-size: 16px; font-weight: bold; display: flex; justify-content: space-between; border-bottom: 2px solid #000; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
         
         header { background: var(--ink); color: #fff; padding: 6px; text-align: center; position: sticky; top: 0; z-index: 100; }
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--line); }
         .weekday { text-align: center; padding: 4px 0; color: #8e835d; font-size: 12px; background: #f0e9d2; border-bottom: 1px solid var(--line); }
-        .cell { min-height: 82px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative; padding: 2px; display: flex; flex-direction: column; background: var(--paper); box-sizing: border-box; }
+        .cell { min-height: 80px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative; padding: 2px; display: flex; flex-direction: column; background: var(--paper); box-sizing: border-box; }
         .day-num { font-size: 1rem; font-weight: bold; color: #4a4a4a; }
         .is-weekend { color: var(--red); }
         
@@ -73,19 +73,19 @@
     function renderCalendar() {
         updateUI();
         const grid = document.getElementById('calendarGrid');
-        const weekdays = document.querySelectorAll('.weekday');
-        grid.innerHTML = ""; weekdays.forEach(w => grid.appendChild(w));
+        grid.innerHTML = ""; 
+        ["日","一","二","三","四","五","六"].forEach(w => {
+            const div = document.createElement('div'); div.className = 'weekday'; div.innerText = w; grid.appendChild(div);
+        });
         document.getElementById('calendar-title').innerText = `${curY}年 ${curM + 1}月`;
         const firstDay = new Date(curY, curM, 1).getDay();
         const daysInMonth = new Date(curY, curM + 1, 0).getDate();
-        const today = new Date();
         for (let i = 0; i < firstDay; i++) grid.appendChild(Object.assign(document.createElement('div'), {className: 'cell'}));
         for (let i = 1; i <= daysInMonth; i++) {
             const cell = document.createElement('div');
             const d = new Date(curY, curM, i);
             cell.className = 'cell';
             const dateKey = `${curY}-${curM + 1}-${i}`;
-            if (curY === today.getFullYear() && curM === today.getMonth() && i === today.getDate()) cell.classList.add('today');
             const note = localStorage.getItem('note-' + dateKey) || "";
             let colorClass = "color-default";
             if (note.includes("例假") || note.includes("休假")) colorClass = "color-holiday";
@@ -97,13 +97,13 @@
                 else if (activeStamp) {
                     let f = document.getElementById('factorySelect').value, t = document.getElementById('typeSelect').value;
                     let n = (f && t) ? f + "\n" + t : (f || t);
-                    save(dateKey, old ? old + "\n" + n : n, null);
-                } else { const n = prompt("記事：", old); if (n !== null) save(dateKey, n, null); }
+                    save(dateKey, old ? old + "\n" + n : n);
+                } else { const n = prompt("記事：", old); if (n !== null) save(dateKey, n); }
             };
             grid.appendChild(cell);
         }
     }
-    function save(k, n, d) { if (n !== null) localStorage.setItem('note-' + k, n); renderCalendar(); }
+    function save(k, n) { localStorage.setItem('note-' + k, n); renderCalendar(); }
     function changeMonth(d) { curM += d; if (curM < 0) {curM=11;curY--;} else if (curM>11) {curM=0;curY++;} renderCalendar(); }
     window.onload = renderCalendar;
 </script>
