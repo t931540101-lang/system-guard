@@ -4,41 +4,37 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>班長指揮官 V6.1 - 平板優化</title>
+    <title>班長指揮官 V7.0 - 下拉選單版</title>
     <style>
         :root { --paper: #f9f4e8; --ink: #2e5a44; --red: #c0392b; --line: #dcd3b6; }
         body { margin: 0; font-family: sans-serif; background: #e8e2d0; -webkit-tap-highlight-color: transparent; }
-        .calendar-box { max-width: 800px; margin: 0 auto; background: var(--paper); min-height: 100vh; padding-bottom: 180px; box-shadow: 0 0 30px rgba(0,0,0,0.1); }
+        .calendar-box { max-width: 800px; margin: 0 auto; background: var(--paper); min-height: 100vh; padding-bottom: 120px; box-shadow: 0 0 30px rgba(0,0,0,0.1); }
         .user-info { background: #1e3d2e; color: #a8bba8; padding: 10px 20px; font-size: 14px; display: flex; justify-content: space-between; border-bottom: 1px solid #142b20; cursor: pointer; }
         header { background: var(--ink); color: #fff; padding: 15px 10px; text-align: center; position: sticky; top: 0; z-index: 100; }
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--line); }
         .weekday { text-align: center; padding: 12px 0; color: #8e835d; font-size: 14px; background: #f0e9d2; font-weight: bold; border-bottom: 1px solid var(--line); }
-        
-        /* 平板優化：縮小高度避免過長 */
         .cell { min-height: 120px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative; padding: 5px; cursor: pointer; display: flex; flex-direction: column; background: var(--paper); overflow: hidden; box-sizing: border-box; }
-        
         .day-num { font-size: 1.3rem; font-weight: bold; color: #4a4a4a; }
         .is-weekend { color: var(--red); }
         .holiday-label { font-size: 11px; color: var(--red); position: absolute; top: 5px; right: 5px; font-weight: bold; }
-        
-        .memo-text { font-size: 3vw; max-font-size: 20px; color: var(--ink); font-weight: 900; text-align: center; margin: auto 0; white-space: pre-wrap; letter-spacing: -1px; width: 100%; line-height: 1.1; }
-        
-        @media (min-width: 600px) { .memo-text { font-size: 1.4rem; } .cell { min-height: 150px; } }
-
+        .memo-text { font-size: 3.5vw; color: var(--ink); font-weight: 900; text-align: center; margin: auto 0; white-space: pre-wrap; letter-spacing: -1px; width: 100%; line-height: 1.1; }
+        @media (min-width: 600px) { .memo-text { font-size: 1.3rem; } .cell { min-height: 150px; } }
         .today { box-shadow: inset 0 0 0 4px var(--red); background: #fffcf5; z-index: 10; }
         .done::after { content: ""; position: absolute; top: 35%; left: -5%; width: 115%; height: 6px; background: rgba(192, 57, 43, 0.6); transform: rotate(10deg); pointer-events: none; border-radius: 10px; }
         
-        .toolbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 800px; background: #f2ebd5; display: flex; flex-direction: column; z-index: 200; border-top: 2px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
-        .stamp-group { display: flex; justify-content: space-around; padding: 10px 5px; }
-        .stamp-btn { padding: 12px 2px; background: #fff; border-radius: 10px; font-weight: bold; border: 1.5px solid var(--line); font-size: 15px; width: 22%; text-align: center; color: #5d5437; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .active-stamp { border-color: var(--ink); background: var(--ink); color: #fff; }
+        /* 下拉選單工具列 */
+        .toolbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 800px; background: #f2ebd5; display: flex; flex-direction: column; z-index: 200; border-top: 2px solid var(--line); padding: 10px 0 env(safe-area-inset-bottom); }
+        .control-row { display: flex; justify-content: space-around; align-items: center; padding: 5px 10px; gap: 8px; }
+        select { padding: 12px 8px; border-radius: 8px; border: 1.5px solid var(--line); background: #fff; font-size: 15px; font-weight: bold; color: var(--ink); flex: 1; outline: none; }
+        .active-mode { border-color: var(--red); background: #fff5f5; }
+        .clear-btn { padding: 12px 15px; background: #fff; border-radius: 8px; border: 1.5px solid var(--red); color: var(--red); font-weight: bold; font-size: 15px; }
     </style>
 </head>
 <body>
 <div class="calendar-box">
     <div class="user-info" onclick="editUserInfo()">
-        <span id="display-name">姓名：載入中...</span>
-        <span id="display-id">工號：載入中...</span>
+        <span id="display-name">姓名：點擊填寫</span>
+        <span id="display-id">工號：點擊填寫</span>
     </div>
     <header>
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -52,26 +48,51 @@
         <div class="weekday">三</div><div class="weekday">四</div><div class="weekday">五</div><div class="weekday">六</div>
     </div>
 </div>
+
 <div class="toolbar">
-    <div class="stamp-group">
-        <div class="stamp-btn" onclick="setStamp('一廠', this)">一廠</div>
-        <div class="stamp-btn" onclick="setStamp('二廠', this)">二廠</div>
-        <div class="stamp-btn" onclick="setStamp('三廠', this)">三廠</div>
-        <div class="stamp-btn" onclick="setStamp('例假', this)" style="color:var(--red);">例假</div>
-    </div>
-    <div class="stamp-group">
-        <div class="stamp-btn" onclick="setStamp('日B班', this)">日B班</div>
-        <div class="stamp-btn" onclick="setStamp('夜B班', this)">夜B班</div>
-        <div class="stamp-btn" onclick="setStamp('休假', this)">休假</div>
-        <div class="stamp-btn" onclick="setStamp('CLEAR', this)" style="color:var(--red);">擦除</div>
+    <div class="control-row">
+        <select id="factorySelect" onchange="updateActiveStamp(this)">
+            <option value="">🏢 選廠區</option>
+            <option value="一廠">一廠</option>
+            <option value="二廠">二廠</option>
+            <option value="三廠">三廠</option>
+        </select>
+        <select id="typeSelect" onchange="updateActiveStamp(this)">
+            <option value="">📝 選項目</option>
+            <option value="日B班">☀️ 日B班</option>
+            <option value="夜B班">🌙 夜B班</option>
+            <option value="夜E班">⚡ 夜E班</option>
+            <option value="例假">🔴 例假</option>
+            <option value="休假">🟢 休假</option>
+            <option value="特休">⭐ 特休</option>
+            <option value="CROSS">🔴/⚪ 劃線</option>
+        </select>
+        <button class="clear-btn" onclick="setClearMode()">擦除</button>
     </div>
 </div>
+
 <script>
     let currentYear = 2026;
     let currentMonth = 2; 
     let activeStamp = "";
-    const holidays = { "1-1": "元旦", "1-20": "大寒", "2-14": "❤情人節", "2-17": "除夕", "2-18": "春節", "2-28": "紀念日", "4-4": "兒童節", "4-5": "清明節", "5-1": "勞動節", "6-19": "端午節", "8-8": "父親節", "9-25": "中秋節", "10-10": "國慶日" };
-    
+    let isClearMode = false;
+
+    const holidays = { "1-1": "元旦", "2-14": "❤情人節", "2-17": "除夕", "2-18": "春節", "2-28": "紀念日", "4-4": "兒童節", "4-5": "清明節", "5-1": "勞動節", "6-19": "端午節", "9-25": "中秋節", "10-10": "國慶日" };
+
+    function updateActiveStamp(el) {
+        isClearMode = false;
+        document.querySelector('.clear-btn').style.background = "#fff";
+        activeStamp = el.value;
+    }
+
+    function setClearMode() {
+        isClearMode = true;
+        activeStamp = "";
+        document.getElementById('factorySelect').value = "";
+        document.getElementById('typeSelect').value = "";
+        document.querySelector('.clear-btn').style.background = "#ffdcdc";
+    }
+
     function editUserInfo() {
         const n = prompt("姓名：", localStorage.getItem('user-name')||"");
         if (n !== null) {
@@ -83,10 +104,7 @@
         document.getElementById('display-name').innerText = "姓名：" + (localStorage.getItem('user-name') || "點擊填寫");
         document.getElementById('display-id').innerText = "工號：" + (localStorage.getItem('user-id') || "點擊填寫");
     }
-    function setStamp(t, el) {
-        if (activeStamp === t) { activeStamp = ""; el.classList.remove('active-stamp'); }
-        else { document.querySelectorAll('.stamp-btn').forEach(b => b.classList.remove('active-stamp')); activeStamp = t; el.classList.add('active-stamp'); }
-    }
+
     function renderCalendar() {
         updateUserInfoDisplay();
         const grid = document.getElementById('calendarGrid');
@@ -113,9 +131,19 @@
                               <div class="memo-text">${note}</div>`;
             cell.onclick = () => {
                 const old = localStorage.getItem('note-' + dateKey) || "";
-                if (!activeStamp) { const n = prompt("記事：", old); if (n !== null) save(dateKey, n, null); }
-                else if (activeStamp === 'CLEAR') { save(dateKey, "", false); }
-                else { let n = activeStamp; if (old && !old.includes(activeStamp)) n = old + "\n" + activeStamp; save(dateKey, n, null); }
+                if (isClearMode) { save(dateKey, "", false); }
+                else if (activeStamp === 'CROSS') { save(dateKey, null, localStorage.getItem('done-' + dateKey) !== "true"); }
+                else if (activeStamp) {
+                    let f = document.getElementById('factorySelect').value;
+                    let t = document.getElementById('typeSelect').value;
+                    let n = "";
+                    if (f && t) n = f + "\n" + t;
+                    else n = f || t;
+                    if (old && !old.includes(n)) n = old + "\n" + n;
+                    save(dateKey, n, null);
+                } else {
+                    const n = prompt("記事：", old); if (n !== null) save(dateKey, n, null);
+                }
             };
             grid.appendChild(cell);
         }
