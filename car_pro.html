@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小銀電工檢測儀</title>
+    <style>
+        :root { --lcd-bg: #0033cc; --lcd-text: #ffffff; --warn: #ffcc00; --danger: #ff4444; }
+        body { margin: 0; font-family: "Courier New", Courier, monospace; background: #222; color: var(--lcd-text); padding: 10px; }
+        
+        /* 模擬測試儀外殼 */
+        .analyzer-case { max-width: 500px; margin: 0 auto; background: #444; border: 15px solid #555; border-radius: 30px; box-shadow: 0 0 20px #000; padding: 20px; }
+        
+        /* 模擬藍色液晶螢幕 */
+        .lcd-screen { background: var(--lcd-bg); border: 10px solid #111; padding: 20px; border-radius: 5px; box-shadow: inset 0 0 30px rgba(0,0,0,0.8); min-height: 400px; }
+        
+        .header { border-bottom: 2px solid var(--lcd-text); padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; letter-spacing: 2px; }
+        
+        .data-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; font-weight: bold; }
+        .label { font-size: 18px; }
+        .value { font-size: 32px; font-family: "Arial Black", Gadget, sans-serif; text-shadow: 2px 2px 0px rgba(0,0,0,0.5); }
+        .unit { font-size: 18px; margin-left: 5px; }
+
+        /* 警報顏色 */
+        .status-warn { color: var(--warn); }
+        .status-danger { color: var(--danger); }
+
+        .input-area { margin-top: 30px; border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 20px; }
+        input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid white; color: white; font-size: 18px; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 10px; background: #666; color: white; border: none; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 5px; box-shadow: 0 4px 0 #333; }
+        button:active { transform: translateY(4px); box-shadow: none; }
+        
+        .footer-tag { text-align: right; font-size: 12px; margin-top: 15px; opacity: 0.7; }
+    </style>
+</head>
+<body>
+<div class="analyzer-case">
+    <div class="lcd-screen">
+        <div class="header">
+            <h1>小銀·測試結果</h1>
+            <div style="font-size: 14px;">STATUS: 正常巡航中</div>
+        </div>
+
+        <div class="data-row">
+            <span class="label">機油倒數</span>
+            <span><span class="value" id="oil">5,000</span><span class="unit">KM</span></span>
+        </div>
+
+        <div class="data-row">
+            <span class="label">輪胎調位</span>
+            <span><span class="value" id="tire">5,000</span><span class="unit">KM</span></span>
+        </div>
+
+        <div class="data-row">
+            <span class="label">電瓶預警</span>
+            <span><span class="value status-warn" id="bat">24</span><span class="unit">個月</span></span>
+        </div>
+
+        <div class="data-row" style="border-top: 2px solid white; padding-top: 10px;">
+            <span class="label">夢想基金</span>
+            <span><span class="unit">$</span><span class="value" id="fund" style="color:#85ffad;">10,599</span></span>
+        </div>
+
+        <div class="input-area">
+            <input type="number" id="mileageInput" placeholder="請輸入目前總里程數">
+            <button onclick="updateData()">數據更新並檢查健康</button>
+            <button onclick="addFund()" style="background:#444;">💰 回報夢想戰功</button>
+        </div>
+        
+        <div class="footer-tag">AUTO POWER V2.0 - 班長指揮官專用</div>
+    </div>
+</div>
+
+<script>
+    function updateData() {
+        const val = document.getElementById('mileageInput').value;
+        if(val) {
+            alert("數據已同步至小銀電腦！");
+            // 這裡之後可以連動 LocalStorage 存檔
+        }
+    }
+    function addFund() {
+        const amt = prompt("輸入省下的浪漫金額：");
+        if(amt) alert("基金已入帳：$" + amt);
+    }
+</script>
+</body>
+</html>
