@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>前輩專用大字日曆</title>
+    <style>
+        :root { --bg: #ffffff; --text: #333333; --red: #d32f2f; --blue: #1976d2; --green: #388e3c; --orange: #f57c00; }
+        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background: #f0f0f0; }
+        .box { max-width: 800px; margin: 0 auto; background: var(--bg); min-height: 100vh; padding-bottom: 140px; }
+        header { background: #333; color: white; padding: 20px; text-align: center; font-size: 28px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #ccc; gap: 1px; }
+        .weekday { background: #eee; padding: 15px 0; text-align: center; font-size: 20px; font-weight: bold; }
+        .cell { background: white; min-height: 110px; padding: 8px; cursor: pointer; position: relative; }
+        .day-num { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+        .sun { color: var(--red); }
+        .sat { color: var(--blue); }
+        .memo { font-size: 20px; font-weight: bold; text-align: center; line-height: 1.2; word-break: break-all; }
+        
+        /* 班別文字顏色 */
+        .work-day { color: var(--orange); }
+        .work-night { color: var(--blue); }
+        .work-off { color: var(--green); }
+
+        /* 下方大按鈕區 */
+        .btns { position: fixed; bottom: 0; width: 100%; max-width: 800px; background: white; border-top: 3px solid #ccc; display: flex; flex-wrap: wrap; padding: 10px 0; }
+        .btn { flex: 1; min-width: 30%; margin: 5px; padding: 15px 0; text-align: center; border-radius: 10px; font-size: 22px; font-weight: bold; color: white; cursor: pointer; }
+        .btn-day { background: var(--orange); }
+        .btn-night { background: var(--blue); }
+        .btn-off { background: var(--green); }
+        .btn-clear { background: #666; }
+        .selected { border: 5px solid black; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <header id="monthTitle">2026年 3月</header>
+    <div class="grid" id="grid">
+        <div class="weekday sun">日</div><div class="weekday">一</div><div class="weekday">二</div>
+        <div class="weekday">三</div><div class="weekday">四</div><div class="weekday">五</div><div class="weekday" style="color:blue">六</div>
+    </div>
+</div>
+
+<div class="btns">
+    <div class="btn btn-day" onclick="sel('日班', this)">蓋日班</div>
+    <div class="btn btn-night" onclick="sel('夜班', this)">蓋夜班</div>
+    <div class="btn btn-off" onclick="sel('休假', this)">蓋休假</div>
+    <div class="btn btn-clear" onclick="sel('CLEAR', this)">橡皮擦</div>
+</div>
+
+<script>
+    let curStamp = "";
+    function sel(t, el) {
+        curStamp = t;
+        document.querySelectorAll('.btn').forEach(b => b.classList.remove('selected'));
+        if(t!=="") el.classList.add('selected');
+    }
+
+    function render() {
+        const grid = document.getElementById('grid');
+        const items = grid.querySelectorAll('.cell');
+        items.forEach(i => i.remove());
+
+        const y = 2026, m = 2; // 3月
+        const first = new Date(y, m, 1).getDay();
+        const days = new Date(y, m + 1, 0).getDate();
+
+        for (let i = 0; i < first; i++) grid.appendChild(document.createElement('div'));
+        for (let i = 1; i <= days; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            const d = new Date(y, m, i).getDay();
+            let numClass = "day-num";
+            if(d===0) numClass += " sun";
+            if(d===6) numClass += " sat";
+            
+            const key = `g-${y}-${m+1}-${i}`;
+            const val = localStorage.getItem(key) || "";
+            let colorClass = "";
+            if(val.includes("日班")) colorClass = "work-day";
+            if(val.includes("夜班")) colorClass = "work-night";
+            if(val.includes("休假")) colorClass = "work-off";
+
+            cell.innerHTML = `<div class="${numClass}">${i}</div><div class="memo ${colorClass}">${val}</div>`;
+            cell.onclick = () => {
+                if(curStamp === "CLEAR") { localStorage.removeItem(key); }
+                else if(curStamp !== "") { localStorage.setItem(key, curStamp); }
+                else {
+                    const n = prompt("寫記事：", val);
+                    if(n !== null) localStorage.setItem(key, n);
+                }
+                render();
+            };
+            grid.appendChild(cell);
+        }
+    }
+    render();
+</script>
+</body>
+</html>
