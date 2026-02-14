@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>神明護佑生活曆 V3.0</title>
+    <title>保平安生活曆 V3.1 - 精準版</title>
     <style>
         :root { --bg: #fffaf0; --text: #5d4037; --red: #d32f2f; --gold: #b8860b; --blue: #1976d2; }
         body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background: #fdf5e6; color: var(--text); -webkit-tap-highlight-color: transparent; }
@@ -19,7 +19,6 @@
         .lunar-info { font-size: 14px; color: var(--red); font-weight: bold; margin-top: 2px; }
         .god-info { font-size: 13px; color: var(--gold); background: #fff9e6; border: 1px solid var(--gold); border-radius: 4px; padding: 1px 2px; margin-top: 2px; text-align: center; line-height: 1.2; }
         .memo { font-size: 18px; font-weight: 900; text-align: center; margin-top: auto; margin-bottom: auto; white-space: pre-wrap; color: #2e5a44; }
-        
         .btns-area { position: fixed; bottom: 0; width: 100%; max-width: 800px; background: #efebe9; border-top: 3px solid #8d6e63; padding: 10px 0; z-index: 200; }
         .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 10px; }
         .btn { padding: 12px 18px; border-radius: 12px; font-size: 18px; font-weight: bold; color: white; cursor: pointer; border: 3px solid transparent; }
@@ -32,19 +31,9 @@
 </head>
 <body>
 <div class="box">
-    <header>
-        <div class="month-ctrl">
-            <div onclick="changeMonth(-1)" style="cursor:pointer">❮</div>
-            <div id="monthTitle">2026年 3月</div>
-            <div onclick="changeMonth(1)" style="cursor:pointer">❯</div>
-        </div>
-    </header>
-    <div class="grid" id="grid">
-        <div class="weekday sun">日</div><div class="weekday">一</div><div class="weekday">二</div>
-        <div class="weekday">三</div><div class="weekday">四</div><div class="weekday">五</div><div class="weekday sat">六</div>
-    </div>
+    <header><div class="month-ctrl"><div onclick="changeMonth(-1)" style="cursor:pointer">❮</div><div id="monthTitle">2026年 2月</div><div onclick="changeMonth(1)" style="cursor:pointer">❯</div></div></header>
+    <div class="grid" id="grid"><div class="weekday sun">日</div><div class="weekday">一</div><div class="weekday">二</div><div class="weekday">三</div><div class="weekday">四</div><div class="weekday">五</div><div class="weekday sat">六</div></div>
 </div>
-
 <div class="btns-area">
     <div class="btn-row">
         <div class="btn btn-pray" onclick="sel('🍎 拜拜', this)">🍎 拜拜</div>
@@ -53,100 +42,66 @@
         <div class="btn btn-clear" onclick="sel('🧼 橡皮擦', this)">🧼 橡皮擦</div>
     </div>
 </div>
-
 <script>
-    let curY = 2026, curM = 2; 
+    let curY = 2026, curM = 1; // 預設顯示 2 月
     let curStamp = "";
 
-    // 2026 國曆對應的農曆重要日子 (初一、十五、神明生)
     const specialDays = {
         "2026-1-1": {lunar: "元旦", god: ""},
-        "2026-2-17": {lunar: "除夕", god: ""},
-        "2026-2-18": {lunar: "初一", god: "彌勒佛聖誕"},
-        "2026-2-26": {lunar: "初九", god: "玉皇大帝萬壽"},
-        "2026-3-4": {lunar: "十五", god: "元宵節/天官大帝"},
+        "2026-2-16": {lunar: "除夕", god: ""},
+        "2026-2-17": {lunar: "初一", god: "彌勒佛聖誕"},
+        "2026-2-25": {lunar: "初九", god: "玉皇大帝萬壽"},
+        "2026-3-3": {lunar: "十五", god: "元宵節/天官大帝"},
         "2026-3-19": {lunar: "初一", god: ""},
         "2026-3-20": {lunar: "初二", god: "土地公生(頭牙)"},
-        "2026-4-2": {lunar: "十五", god: ""},
+        "2026-4-1": {lunar: "十五", god: ""},
         "2026-4-17": {lunar: "初一", god: ""},
         "2026-5-1": {lunar: "十五", god: ""},
-        "2026-5-9": {lunar: "三月廿三", god: "🎨 媽祖聖誕"},
+        "2026-5-9": {lunar: "三月廿三", god: "媽祖聖誕"},
         "2026-5-16": {lunar: "初一", god: ""},
         "2026-5-30": {lunar: "十五", god: ""},
-        "2026-6-14": {lunar: "初一", god: ""},
-        "2026-6-28": {lunar: "十五", god: ""},
+        "2026-6-15": {lunar: "初一", god: ""},
+        "2026-6-19": {lunar: "五月初五", god: "🏮 端午節"},
+        "2026-6-29": {lunar: "十五", god: ""},
         "2026-7-14": {lunar: "初一", god: ""},
         "2026-7-28": {lunar: "十五", god: ""},
         "2026-8-7": {lunar: "六月廿四", god: "⚔️ 關聖帝君誕"},
-        "2026-8-12": {lunar: "初一", god: ""},
-        "2026-8-26": {lunar: "十五", god: ""},
-        "2026-8-28": {lunar: "七月十五", god: "👻 中元節/地官"},
+        "2026-8-13": {lunar: "初一", god: ""},
+        "2026-8-27": {lunar: "十五", god: ""},
+        "2026-8-28": {lunar: "七月十五", god: "👻 中元節"},
         "2026-9-11": {lunar: "初一", god: ""},
         "2026-9-25": {lunar: "十五", god: "🎑 中秋節"},
-        "2026-10-10": {lunar: "初一", god: ""},
-        "2026-10-24": {lunar: "十五", god: ""},
         "2026-11-9": {lunar: "初一", god: ""},
-        "2026-11-23": {lunar: "十五", god: "🌊 下官大帝誕"},
+        "2026-11-23": {lunar: "十五", god: "下官大帝誕"},
         "2026-12-8": {lunar: "初一", god: ""},
-        "2026-12-22": {lunar: "十五", god: "🏮 冬至"}
+        "2026-12-22": {lunar: "🏮 冬至", god: "十五"}
     };
 
-    function sel(t, el) {
-        curStamp = t;
-        document.querySelectorAll('.btn').forEach(b => b.classList.remove('selected'));
-        if(t!=="") el.classList.add('selected');
-    }
-
+    function sel(t, el) { curStamp = t; document.querySelectorAll('.btn').forEach(b => b.classList.remove('selected')); if(t!=="") el.classList.add('selected'); }
     function render() {
         const grid = document.getElementById('grid');
         grid.querySelectorAll('.cell').forEach(i => i.remove());
         document.getElementById('monthTitle').innerText = `${curY}年 ${curM + 1}月`;
-        
         const first = new Date(curY, curM, 1).getDay();
         const days = new Date(curY, curM + 1, 0).getDate();
-
-        for (let i = 0; i < first; i++) {
-            const empty = document.createElement('div');
-            empty.className = 'cell';
-            empty.style.background = "#f4f0e6";
-            grid.appendChild(empty);
-        }
-
+        for (let i = 0; i < first; i++) { const e = document.createElement('div'); e.className = 'cell'; e.style.background = "#f4f0e6"; grid.appendChild(e); }
         for (let i = 1; i <= days; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
+            const cell = document.createElement('div'); cell.className = 'cell';
             const dateStr = `${curY}-${curM+1}-${i}`;
             const d = new Date(curY, curM, i).getDay();
-            let nC = "day-num"; 
-            if(d===0) nC+=" sun"; 
-            if(d===6) nC+=" sat";
-            
+            let nC = "day-num"; if(d===0) nC+=" sun"; if(d===6) nC+=" sat";
             const info = specialDays[dateStr] || {lunar:"", god:""};
-            const key = `life-god-${dateStr}`;
-            const val = localStorage.getItem(key) || "";
-
-            cell.innerHTML = `
-                <div class="${nC}">${i}</div>
-                ${info.lunar ? `<div class="lunar-info">${info.lunar}</div>` : ''}
-                ${info.god ? `<div class="god-info">${info.god}</div>` : ''}
-                <div class="memo">${val}</div>
-            `;
-
+            const key = `life-god-${dateStr}`; const val = localStorage.getItem(key) || "";
+            cell.innerHTML = `<div class="${nC}">${i}</div>${info.lunar ? `<div class="lunar-info">${info.lunar}</div>` : ''}${info.god ? `<div class="god-info">${info.god}</div>` : ''}<div class="memo">${val}</div>`;
             cell.onclick = () => {
                 if(curStamp === "🧼 橡皮擦") { localStorage.removeItem(key); }
-                else if(curStamp !== "") {
-                    const old = localStorage.getItem(key) || "";
-                    localStorage.setItem(key, old ? old + "\n" + curStamp : curStamp);
-                } else {
-                    const n = prompt("寫記事：", val);
-                    if(n !== null) localStorage.setItem(key, n);
-                }
+                else if(curStamp !== "") { const old = localStorage.getItem(key) || ""; localStorage.setItem(key, old ? old + "\n" + curStamp : curStamp); }
+                else { const n = prompt("寫記事：", val); if(n !== null) localStorage.setItem(key, n); }
                 render();
             };
             grid.appendChild(cell);
         }
     }
-
     function changeMonth(d) { curM += d; if (curM < 0) {curM=11;curY--;} else if (curM>11) {curM=0;curY++;} render(); }
     render();
 </script>
