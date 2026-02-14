@@ -3,43 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>保平安生活日曆 V2.0</title>
+    <title>神明護佑生活曆 V3.0</title>
     <style>
-        :root { --bg: #fffaf0; --text: #5d4037; --red: #d32f2f; --gold: #b8860b; }
-        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background: #fdf5e6; color: var(--text); }
-        .box { max-width: 800px; margin: 0 auto; background: var(--bg); min-height: 100vh; padding-bottom: 180px; }
+        :root { --bg: #fffaf0; --text: #5d4037; --red: #d32f2f; --gold: #b8860b; --blue: #1976d2; }
+        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background: #fdf5e6; color: var(--text); -webkit-tap-highlight-color: transparent; }
+        .box { max-width: 800px; margin: 0 auto; background: var(--bg); min-height: 100vh; padding-bottom: 180px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         header { background: #8d6e63; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
-        .month-ctrl { display: flex; justify-content: space-between; align-items: center; font-size: 24px; }
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #d7ccc8; gap: 1px; }
+        .month-ctrl { display: flex; justify-content: space-between; align-items: center; font-size: 24px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #d7ccc8; gap: 1px; border: 1px solid #d7ccc8; }
         .weekday { background: #efebe9; padding: 10px 0; text-align: center; font-size: 20px; font-weight: bold; }
-        .cell { background: white; min-height: 110px; padding: 5px; cursor: pointer; position: relative; }
-        .day-num { font-size: 24px; font-weight: bold; }
-        .lunar-text { font-size: 14px; color: #888; font-weight: normal; }
+        .cell { background: white; min-height: 120px; padding: 5px; cursor: pointer; position: relative; display: flex; flex-direction: column; box-sizing: border-box; }
+        .day-num { font-size: 26px; font-weight: bold; line-height: 1; }
         .sun { color: var(--red); }
-        .sat { color: #1976d2; }
-        .memo { font-size: 18px; font-weight: bold; text-align: center; margin-top: 5px; white-space: pre-wrap; }
+        .sat { color: var(--blue); }
+        .lunar-info { font-size: 14px; color: var(--red); font-weight: bold; margin-top: 2px; }
+        .god-info { font-size: 13px; color: var(--gold); background: #fff9e6; border: 1px solid var(--gold); border-radius: 4px; padding: 1px 2px; margin-top: 2px; text-align: center; line-height: 1.2; }
+        .memo { font-size: 18px; font-weight: 900; text-align: center; margin-top: auto; margin-bottom: auto; white-space: pre-wrap; color: #2e5a44; }
         
-        /* 標籤顏色 */
-        .tag-pray { color: var(--red); border: 1px solid var(--red); border-radius: 4px; padding: 2px; }
-        .tag-money { color: var(--gold); }
-
-        .btns-area { position: fixed; bottom: 0; width: 100%; max-width: 800px; background: #efebe9; border-top: 2px solid #d7ccc8; padding: 10px 0; }
-        .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 5px; }
-        .btn { padding: 15px 20px; border-radius: 15px; font-size: 20px; font-weight: bold; color: white; cursor: pointer; }
+        .btns-area { position: fixed; bottom: 0; width: 100%; max-width: 800px; background: #efebe9; border-top: 3px solid #8d6e63; padding: 10px 0; z-index: 200; }
+        .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 10px; }
+        .btn { padding: 12px 18px; border-radius: 12px; font-size: 18px; font-weight: bold; color: white; cursor: pointer; border: 3px solid transparent; }
         .btn-pray { background: var(--red); }
+        .btn-doc { background: var(--blue); }
         .btn-money { background: var(--gold); }
-        .btn-doc { background: #1976d2; }
         .btn-clear { background: #666; }
-        .selected { border: 4px solid black; }
+        .selected { border-color: #000; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 <div class="box">
     <header>
         <div class="month-ctrl">
-            <div onclick="changeMonth(-1)">❮ 上個月</div>
+            <div onclick="changeMonth(-1)" style="cursor:pointer">❮</div>
             <div id="monthTitle">2026年 3月</div>
-            <div onclick="changeMonth(1)">下個月 ❯</div>
+            <div onclick="changeMonth(1)" style="cursor:pointer">❯</div>
         </div>
     </header>
     <div class="grid" id="grid">
@@ -50,16 +47,49 @@
 
 <div class="btns-area">
     <div class="btn-row">
-        <div class="btn btn-pray" onclick="sel('🍎 拜拜/初一十五', this)">🍎 拜拜</div>
-        <div class="btn btn-money" onclick="sel('🧧 領錢/發薪', this)">🧧 領錢</div>
+        <div class="btn btn-pray" onclick="sel('🍎 拜拜', this)">🍎 拜拜</div>
         <div class="btn btn-doc" onclick="sel('🏥 看醫生', this)">🏥 看醫生</div>
-        <div class="btn btn-clear" onclick="sel('CLEAR', this)">🧼 橡皮擦</div>
+        <div class="btn btn-money" onclick="sel('🧧 領錢', this)">🧧 領錢</div>
+        <div class="btn btn-clear" onclick="sel('🧼 橡皮擦', this)">🧼 橡皮擦</div>
     </div>
 </div>
 
 <script>
-    let curY = 2026, curM = 2; // 預設 3 月
+    let curY = 2026, curM = 2; 
     let curStamp = "";
+
+    // 2026 國曆對應的農曆重要日子 (初一、十五、神明生)
+    const specialDays = {
+        "2026-1-1": {lunar: "元旦", god: ""},
+        "2026-2-17": {lunar: "除夕", god: ""},
+        "2026-2-18": {lunar: "初一", god: "彌勒佛聖誕"},
+        "2026-2-26": {lunar: "初九", god: "玉皇大帝萬壽"},
+        "2026-3-4": {lunar: "十五", god: "元宵節/天官大帝"},
+        "2026-3-19": {lunar: "初一", god: ""},
+        "2026-3-20": {lunar: "初二", god: "土地公生(頭牙)"},
+        "2026-4-2": {lunar: "十五", god: ""},
+        "2026-4-17": {lunar: "初一", god: ""},
+        "2026-5-1": {lunar: "十五", god: ""},
+        "2026-5-9": {lunar: "三月廿三", god: "🎨 媽祖聖誕"},
+        "2026-5-16": {lunar: "初一", god: ""},
+        "2026-5-30": {lunar: "十五", god: ""},
+        "2026-6-14": {lunar: "初一", god: ""},
+        "2026-6-28": {lunar: "十五", god: ""},
+        "2026-7-14": {lunar: "初一", god: ""},
+        "2026-7-28": {lunar: "十五", god: ""},
+        "2026-8-7": {lunar: "六月廿四", god: "⚔️ 關聖帝君誕"},
+        "2026-8-12": {lunar: "初一", god: ""},
+        "2026-8-26": {lunar: "十五", god: ""},
+        "2026-8-28": {lunar: "七月十五", god: "👻 中元節/地官"},
+        "2026-9-11": {lunar: "初一", god: ""},
+        "2026-9-25": {lunar: "十五", god: "🎑 中秋節"},
+        "2026-10-10": {lunar: "初一", god: ""},
+        "2026-10-24": {lunar: "十五", god: ""},
+        "2026-11-9": {lunar: "初一", god: ""},
+        "2026-11-23": {lunar: "十五", god: "🌊 下官大帝誕"},
+        "2026-12-8": {lunar: "初一", god: ""},
+        "2026-12-22": {lunar: "十五", god: "🏮 冬至"}
+    };
 
     function sel(t, el) {
         curStamp = t;
@@ -75,29 +105,40 @@
         const first = new Date(curY, curM, 1).getDay();
         const days = new Date(curY, curM + 1, 0).getDate();
 
-        for (let i = 0; i < first; i++) grid.appendChild(document.createElement('div'));
+        for (let i = 0; i < first; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'cell';
+            empty.style.background = "#f4f0e6";
+            grid.appendChild(empty);
+        }
+
         for (let i = 1; i <= days; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
+            const dateStr = `${curY}-${curM+1}-${i}`;
             const d = new Date(curY, curM, i).getDay();
-            let nC = "day-num"; if(d===0) nC+=" sun"; if(d===6) nC+=" sat";
+            let nC = "day-num"; 
+            if(d===0) nC+=" sun"; 
+            if(d===6) nC+=" sat";
             
-            const key = `life-${curY}-${curM+1}-${i}`;
+            const info = specialDays[dateStr] || {lunar:"", god:""};
+            const key = `life-god-${dateStr}`;
             const val = localStorage.getItem(key) || "";
-            
-            // 這裡可以手動加入一些特定的日子註記 (示範)
-            let special = "";
-            if (curM === 2 && i === 19) special = "<br><span style='color:red; font-size:12px;'>初一</span>";
-            if (curM === 2 && i === 4) special = "<br><span style='color:red; font-size:12px;'>十五</span>";
 
-            cell.innerHTML = `<div class="${nC}">${i}${special}</div><div class="memo">${val}</div>`;
+            cell.innerHTML = `
+                <div class="${nC}">${i}</div>
+                ${info.lunar ? `<div class="lunar-info">${info.lunar}</div>` : ''}
+                ${info.god ? `<div class="god-info">${info.god}</div>` : ''}
+                <div class="memo">${val}</div>
+            `;
+
             cell.onclick = () => {
-                if(curStamp === "CLEAR") { localStorage.removeItem(key); }
+                if(curStamp === "🧼 橡皮擦") { localStorage.removeItem(key); }
                 else if(curStamp !== "") {
                     const old = localStorage.getItem(key) || "";
                     localStorage.setItem(key, old ? old + "\n" + curStamp : curStamp);
                 } else {
-                    const n = prompt("想記點什麼？", val);
+                    const n = prompt("寫記事：", val);
                     if(n !== null) localStorage.setItem(key, n);
                 }
                 render();
@@ -105,6 +146,7 @@
             grid.appendChild(cell);
         }
     }
+
     function changeMonth(d) { curM += d; if (curM < 0) {curM=11;curY--;} else if (curM>11) {curM=0;curY++;} render(); }
     render();
 </script>
