@@ -1,139 +1,16 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K9 獸醫護理站 | 全功能專業版</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; }
-        .medical-paper { background: white; border: 2px solid #334155; box-shadow: 8px 8px 0px #cbd5e1; }
-        .stamp { border: 3px solid #ef4444; color: #ef4444; transform: rotate(-15deg); font-weight: 900; padding: 2px 8px; border-radius: 4px; display: inline-block; font-size: 12px; }
-        .record-row:hover { background-color: #f1f5f9; cursor: pointer; }
-        /* 強制長文字在手機上換行，不撐破格子 */
-        .break-word { word-break: break-all; }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        function App() {
-            const [dogs, setDogs] = useState(() => {
-                const saved = localStorage.getItem('K9_MEDICAL_PRO_V6');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, name: '張布丁', sex: 'M', age: '3Y+', weight: '43.5', breed: '高山犬', logs: [] },
-                    { id: 2, name: '妞妞', sex: 'F', age: '?', weight: '?', breed: '米克斯', logs: [] },
-                    { id: 3, name: '狗狗3號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
-                    { id: 4, name: '狗狗4號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
-                    { id: 5, name: '狗狗5號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
-                    { id: 6, name: '狗狗6號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
-                    { id: 7, name: '狗狗7號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] },
-                    { id: 8, name: '狗狗8號', sex: '?', age: '?', weight: '?', breed: '?', logs: [] }
-                ];
-            });
-
-            useEffect(() => {
-                localStorage.setItem('K9_MEDICAL_PRO_V6', JSON.stringify(dogs));
-            }, [dogs]);
-
-            const editBaseInfo = (dogId) => {
-                const dog = dogs.find(d => d.id === dogId);
-                const nName = prompt("修改名字:", dog.name);
-                const nSex = prompt("修改性別 (M/F):", dog.sex);
-                const nAge = prompt("修改年齡:", dog.age);
-                const nWeight = prompt("修改體重 (KG):", dog.weight);
-                const nBreed = prompt("修改品種:", dog.breed);
-                setDogs(dogs.map(d => d.id === dogId ? { ...d, name: nName || d.name, sex: nSex || d.sex, age: nAge || d.age, weight: nWeight || d.weight, breed: nBreed || d.breed } : d));
-            };
-
-            const addLog = (id) => {
-                const note = prompt("請輸入臨床診斷或用藥紀錄：");
-                if (!note) return;
-                // 優化時間顯示，強制換行
-                const now = new Date();
-                const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                setDogs(dogs.map(d => d.id === id ? { ...d, logs: [{ id: Date.now(), time: timeStr, note }, ...d.logs] } : d));
-            };
-
-            const editLog = (dogId, logId) => {
-                const dog = dogs.find(d => d.id === dogId);
-                const log = dog.logs.find(l => l.id === logId);
-                const action = prompt("請選擇操作：\n1. 修改紀錄\n2. 刪除紀錄");
-                if (action === "1") {
-                    const newNote = prompt("修改紀錄內容:", log.note);
-                    if (newNote) setDogs(dogs.map(d => d.id === dogId ? { ...d, logs: d.logs.map(l => l.id === logId ? { ...l, note: newNote } : l) } : d));
-                } else if (action === "2") {
-                    if (confirm("確定刪除？")) setDogs(dogs.map(d => d.id === dogId ? { ...d, logs: d.logs.filter(l => l.id !== logId) } : d));
-                }
-            };
-
-            return (
-                <div className="p-2 max-w-4xl mx-auto">
-                    <header className="flex justify-between items-end border-b-4 border-slate-800 pb-2 mb-6">
-                        <div>
-                            <h1 className="text-xl md:text-3xl font-black tracking-tighter text-slate-800">台灣精銳犬隻 臨床病歷系統</h1>
-                            <p className="text-[10px] font-bold text-slate-500">照護護理師：小黑哥</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-[10px] font-mono font-bold uppercase">v6.1 MobileFix</p>
-                            <div className="stamp">已認證</div>
-                        </div>
-                    </header>
-
-                    {dogs.map(dog => (
-                        <div key={dog.id} className="medical-paper p-4 mb-8 relative">
-                            <button onClick={() => editBaseInfo(dog.id)} className="absolute right-4 top-4 text-lg" title="編輯基本資料">✏️</button>
-                            
-                            {/* 基本資料區：手機版字體微調 */}
-                            <div className="grid grid-cols-4 border-2 border-slate-800 mb-4 text-[13px]">
-                                <div className="bg-slate-800 text-white p-1 text-[10px] font-bold uppercase flex items-center justify-center">姓名</div>
-                                <div className="p-1 border-r-2 border-slate-800 font-black text-blue-600 truncate">{dog.name}</div>
-                                <div className="bg-slate-800 text-white p-1 text-[10px] font-bold uppercase flex items-center justify-center">體重</div>
-                                <div className="p-1 font-black">{dog.weight} KG</div>
-                                <div className="bg-slate-800 text-white p-1 text-[10px] font-bold uppercase border-t-2 border-slate-800 flex items-center justify-center">性別/年齡</div>
-                                <div className="p-1 border-r-2 border-slate-800 border-t-2 border-slate-800 font-bold text-center">{dog.sex}/{dog.age}</div>
-                                <div className="bg-slate-800 text-white p-1 text-[10px] font-bold uppercase border-t-2 border-slate-800 flex items-center justify-center">品種</div>
-                                <div className="p-1 border-t-2 border-slate-800 font-bold truncate">{dog.breed}</div>
-                            </div>
-
-                            {/* 診斷紀錄區：調整比例 30% : 70% */}
-                            <div className="border-2 border-slate-800 min-h-[120px]">
-                                <div className="flex bg-slate-100 border-b-2 border-slate-800 font-bold text-[12px]">
-                                    <div className="w-[30%] p-2 border-r-2 border-slate-800">診療時間</div>
-                                    <div className="w-[70%] p-2">臨床紀錄 (點擊修改)</div>
-                                </div>
-                                {dog.logs.map((log) => (
-                                    <div key={log.id} onClick={() => editLog(dog.id, log.id)} className="flex border-b border-slate-300 record-row text-[13px] min-h-[50px]">
-                                        <div className="w-[30%] p-2 border-r-2 border-slate-800 font-mono text-[10px] text-slate-600 flex items-center break-all">
-                                            {log.time}
-                                        </div>
-                                        <div className="w-[70%] p-2 font-medium text-slate-800 italic break-word">
-                                            {log.note}
-                                        </div>
-                                    </div>
-                                ))}
-                                {dog.logs.length === 0 && <div className="p-8 text-center text-slate-300 italic text-sm">尚無診療紀錄</div>}
-                            </div>
-                            <button onClick={() => addLog(dog.id)} className="mt-4 w-full bg-slate-800 text-white py-3 font-black text-sm active:bg-emerald-600 transition-colors">
-                                + 新增臨床紀錄 (ADD ENTRY)
-                            </button>
-                        </div>
-                    ))}
-                    <footer className="text-center text-[10px] text-slate-400 mt-10 uppercase tracking-widest font-bold">
-                        台灣精銳犬隻專用病歷表 - 非授權請勿使用
-                    </footer>
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+<header className="flex justify-between items-center border-b-4 border-slate-800 pb-2 mb-6">
+    <div className="flex-1 pr-2">
+        <h1 className="text-xl font-black tracking-tight text-slate-800 leading-tight">
+            台灣精銳犬隻<br/>臨床病歷系統
+        </h1>
+        <p className="text-[11px] font-bold text-slate-500 mt-1">
+            👨‍⚕️ 照護護理師：小黑哥
+        </p>
+    </div>
+    <div className="flex flex-col items-end">
+        <span className="text-[9px] font-mono font-bold text-slate-400 bg-slate-200 px-1 rounded">
+            V6.1 MOBILEFIX
+        </span>
+        <div className="stamp mt-1 scale-90 origin-right">已認證</div>
+    </div>
+</header>
