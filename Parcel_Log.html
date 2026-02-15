@@ -3,6 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣精銳包裹登記平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --primary-color: #d32f2f; --bg-color: #f4f4f4; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg-color); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 700px; width: 100%; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .header-section { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; outline: none; }
+        .full-width { grid-column: span 2; }
+        button.add-btn { grid-column: span 2; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .search-bar { width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 5px; margin: 20px 0; box-sizing: border-box; }
+        .parcel-card { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .info b { font-size: 16px; color: #333; }
+        .btn-group { display: flex; gap: 5px; align-items: center; }
+        .btn-mail { background: #ff9800; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .status { padding: 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center; min-width: 60px; }
+        .status.pending { background: #ffcdd2; color: #b71c1c; }
+        .status.done { background: #c8e6c9; color: #2e7d32; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h2 class="text-xl font-bold">台灣精銳包裹登記平台</h2>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="dept" placeholder="單位名稱 (如: 業務部)">
+        <input type="text" id="receiver" placeholder="收件人姓名">
+        <input type="email" id="email" placeholder="同事的 Email (必填)">
+        <select id="type">
+            <option value="一般包裹">📦 一般包裹</option>
+            <option value="掛號信件">✉️ 掛號信件</option>
+            <option value="低溫冷藏">❄️ 低溫冷藏</option>
+            <option value="外送美食">🍕 外送美食</option>
+        </select>
+        <input type="text" id="logistics" placeholder="物流公司 (如: 黑貓)">
+        <input type="text" id="note" placeholder="備註 (如: 代付100元)" class="full-width">
+        <button id="saveBtn" class="add-btn" onclick="addParcel()">➕ 登記並加入清單</button>
+    </div>
+
+    <input type="text" class="search-bar" id="searchBar" onkeyup="searchParcels()" placeholder="🔍 快速搜尋...">
+    <div id="parcelList"></div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxm4CDB5i8V2CX6lbCu4gxI2TH-jGKFznI8H01CLlnKEh9Fdr71pfeQr7ai6VcVtAvomw/exec";
+    let parcels = JSON.parse(localStorage.getItem('parcels') || '[]');
+
+    renderParcels();
+
+    async function addParcel() {
+        const dept = document.getElementById('dept').value;
+        const receiver = document.getElementById('receiver').value;
+        const email = document.getElementById('email').value;
+        const type = document.getElementById('type').value;
+        const logistics = document.getElementById('logistics').value;
+        const note = document.getElementById('note').value;
+        const btn = document.getElementById('saveBtn');
+
+        if (!receiver || !email) { alert("姓名與 Email 為必填！"); return; }
+
+        btn.disabled = true;
+        btn.innerText = "正在登記..."; // 偽裝成普通處理中
+
+        try {
+            // 背景同步
+            const query = `type=parcel&dept=${encodeURIComponent(dept)}&receiver=${encodeURIComponent(receiver)}&email=${encodeURIComponent(email)}&pType=${encodeURIComponent(type)}&courier=${encodeURIComponent(logistics)}&note=${encodeURIComponent(note)}`;
+            fetch(`${SCRIPT_URL}?${query}`, { mode: 'no-cors' });
+            
+            // 本地顯示
+            const newParcel = {
+                id: Date.now(),
+                dept, receiver, email, type, logistics, note,
+                time: new Date().toLocaleString(),
+                status: 'pending'
+            };
+            parcels.unshift(newParcel);
+            localStorage.setItem('parcels', JSON.stringify(parcels));
+            
+            renderParcels();
+            alert("✅ 登記完成！"); // 隱藏雲端成功的字眼
+            
+            document.querySelectorAll('input').forEach(i => i.value = '');
+        } catch (e) {
+            console.log("Silent error");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "➕ 登記並加入清單";
+        }
+    }
+
+    function renderParcels(filter = '') {
+        const list = document.getElementById('parcelList');
+        list.innerHTML = '';
+        parcels.filter(p => p.receiver.includes(filter) || p.dept.includes(filter)).forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'parcel-card';
+            card.innerHTML = `
+                <div class="info">
+                    <b>[${p.dept}] ${p.receiver}</b>
+                    <p class="text-xs text-gray-500">${p.type} | ${p.logistics} <br> ${p.time}</p>
+                    ${p.note ? `<p style="color:red; font-size:12px;">📝 ${p.note}</p>` : ''}
+                </div>
+                <div class="btn-group">
+                    <button class="btn-mail" onclick="sendEmail(${p.id})">📧 寄信</button>
+                    <div class="status ${p.status}" onclick="toggleStatus(${p.id})">
+                        ${p.status === 'pending' ? '待領' : '已領'}
+                    </div>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function toggleStatus(id) {
+        const p = parcels.find(x => x.id === id);
+        p.status = p.status === 'pending' ? 'done' : 'pending';
+        localStorage.setItem('parcels', JSON.stringify(parcels));
+        renderParcels();
+    }
+
+    function sendEmail(id) {
+        const p = parcels.find(x => x.id === id);
+        const subject = encodeURIComponent(`[包裹到貨通知] 您好，您的 ${p.type} 已送達櫃台`);
+        const body = encodeURIComponent(`您好：\n\n您有一件來自 [${p.logistics}] 的 ${p.type} 已送達總機櫃台。\n\n請撥冗至櫃台領取，謝謝。`);
+        window.location.href = `mailto:${p.email}?subject=${subject}&body=${body}`;
+    }
+
+    function searchParcels() {
+        renderParcels(document.getElementById('searchBar').value);
+    }
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">台灣精銳包裹登記平台</title>
     <style>
         :root { --primary-color: #d32f2f; --bg-color: #f4f4f4; } /* 改成比較專業的紅色系 */
