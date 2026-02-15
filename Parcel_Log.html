@@ -4,22 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">台灣精銳包裹登記平台</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --primary-color: #d32f2f; --bg-color: #f4f4f4; }
+        :root { --primary-color: #d32f2f; --bg-color: #f4f4f4; } /* 改成比較專業的紅色系 */
         body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg-color); padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 700px; width: 100%; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .header-section { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
         .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; outline: none; }
-        input:focus { border-color: var(--primary-color); }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
         .full-width { grid-column: span 2; }
-        button.add-btn { grid-column: span 2; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
-        button.add-btn:active { opacity: 0.8; }
+        button.add-btn { grid-column: span 2; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; }
         .search-bar { width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 5px; margin: 20px 0; box-sizing: border-box; }
         .parcel-card { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .info b { font-size: 16px; color: #333; }
-        .btn-group { display: flex; gap: 5px; align-items: center; }
+        .info b { font-size: 16px; }
+        .btn-group { display: flex; gap: 5px; }
         .btn-mail { background: #ff9800; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         .status { padding: 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center; min-width: 60px; }
         .status.pending { background: #ffcdd2; color: #b71c1c; }
@@ -30,7 +27,7 @@
 
 <div class="container">
     <div class="header-section">
-        <h2 id="mainTitle" class="text-xl font-bold">台灣精銳包裹登記平台</h2>
+        <h2 id="mainTitle">台灣精銳包裹登記平台</h2>
     </div>
 
     <div class="input-group">
@@ -41,11 +38,10 @@
             <option value="一般包裹">📦 一般包裹</option>
             <option value="掛號信件">✉️ 掛號信件</option>
             <option value="低溫冷藏">❄️ 低溫冷藏</option>
-            <option value="外送美食">🍕 外送美食</option>
         </select>
         <input type="text" id="logistics" placeholder="物流公司 (如: 黑貓)">
         <input type="text" id="note" placeholder="備註 (如: 代付100元)" class="full-width">
-        <button id="saveBtn" class="add-btn" onclick="addParcel()">➕ 登記並同步至雲端</button>
+        <button class="add-btn" onclick="addParcel()">➕ 登記並加入清單</button>
     </div>
 
     <input type="text" class="search-bar" id="searchBar" onkeyup="searchParcels()" placeholder="🔍 快速搜尋...">
@@ -53,53 +49,27 @@
 </div>
 
 <script>
-    // 妳的雲端傳輸網址
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxm4CDB5i8V2CX6lbCu4gxI2TH-jGKFznI8H01CLlnKEh9Fdr71pfeQr7ai6VcVtAvomw/exec";
-    let parcels = JSON.parse(localStorage.getItem('parcels') || '[]');
+    let parcels = [];
 
-    // 初始化顯示
-    renderParcels();
-
-    async function addParcel() {
+    function addParcel() {
         const dept = document.getElementById('dept').value;
         const receiver = document.getElementById('receiver').value;
         const email = document.getElementById('email').value;
         const type = document.getElementById('type').value;
         const logistics = document.getElementById('logistics').value;
         const note = document.getElementById('note').value;
-        const btn = document.getElementById('saveBtn');
 
         if (!receiver || !email) { alert("姓名與 Email 為必填！"); return; }
 
-        btn.disabled = true;
-        btn.innerText = "正在傳輸至雲端...";
+        const newParcel = {
+            id: Date.now(),
+            dept, receiver, email, type, logistics, note,
+            time: new Date().toLocaleString(),
+            status: 'pending'
+        };
 
-        // 1. 同步到 Google 試算表
-        try {
-            const query = `type=parcel&dept=${encodeURIComponent(dept)}&receiver=${encodeURIComponent(receiver)}&email=${encodeURIComponent(email)}&pType=${encodeURIComponent(type)}&courier=${encodeURIComponent(logistics)}&note=${encodeURIComponent(note)}`;
-            await fetch(`${SCRIPT_URL}?${query}`, { mode: 'no-cors' });
-            
-            // 2. 本地清單顯示 (讓總機可以看到剛剛登記的)
-            const newParcel = {
-                id: Date.now(),
-                dept, receiver, email, type, logistics, note,
-                time: new Date().toLocaleString(),
-                status: 'pending'
-            };
-            parcels.unshift(newParcel);
-            localStorage.setItem('parcels', JSON.stringify(parcels));
-            
-            renderParcels();
-            alert("✅ 登記成功且已同步雲端！");
-            
-            // 清空輸入框
-            document.querySelectorAll('input').forEach(i => i.value = '');
-        } catch (e) {
-            alert("雲端同步失敗，請檢查網路！");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "➕ 登記並同步至雲端";
-        }
+        parcels.unshift(newParcel);
+        renderParcels();
     }
 
     function sendEmail(id) {
@@ -118,8 +88,8 @@
             card.innerHTML = `
                 <div class="info">
                     <b>[${p.dept}] ${p.receiver}</b>
-                    <p class="text-xs text-gray-500">${p.type} | ${p.logistics} <br> ${p.time}</p>
-                    ${p.note ? `<p style="color:red; font-size:12px;">📝 ${p.note}</p>` : ''}
+                    <p>${p.type} | ${p.logistics} <br> <small>${p.time}</small></p>
+                    ${p.note ? `<p style="color:red">📝 ${p.note}</p>` : ''}
                 </div>
                 <div class="btn-group">
                     <button class="btn-mail" onclick="sendEmail(${p.id})">📧 寄信</button>
@@ -135,7 +105,6 @@
     function toggleStatus(id) {
         const p = parcels.find(x => x.id === id);
         p.status = p.status === 'pending' ? 'done' : 'pending';
-        localStorage.setItem('parcels', JSON.stringify(parcels));
         renderParcels();
     }
 
