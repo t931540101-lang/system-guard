@@ -3,115 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">台灣精銳包裹登記平台</title>
+    <title>台灣精銳包裹登記平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --primary-color: #d32f2f; --bg-color: #f4f4f4; } /* 改成比較專業的紅色系 */
-        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg-color); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 700px; width: 100%; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .header-section { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
-        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
-        .full-width { grid-column: span 2; }
-        button.add-btn { grid-column: span 2; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .search-bar { width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 5px; margin: 20px 0; box-sizing: border-box; }
-        .parcel-card { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .info b { font-size: 16px; }
-        .btn-group { display: flex; gap: 5px; }
-        .btn-mail { background: #ff9800; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .status { padding: 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center; min-width: 60px; }
-        .status.pending { background: #ffcdd2; color: #b71c1c; }
-        .status.done { background: #c8e6c9; color: #2e7d32; }
+        body { background-color: #f3f4f6; font-family: sans-serif; }
+        .form-container { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 4px solid #d32f2f; }
+        input, select { border: 1px solid #ccc !important; border-radius: 4px !important; padding: 8px !important; width: 100%; }
+        .btn-submit { background-color: #d32f2f; color: white; transition: background 0.3s; }
+        .btn-submit:hover { background-color: #b71c1c; }
     </style>
 </head>
-<body>
+<body class="p-4 flex items-center justify-center min-h-screen">
+    <div class="form-container w-full max-w-2xl p-8">
+        <h1 class="text-center text-xl font-bold mb-8 tracking-widest">台灣精銳包裹登記平台</h1>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="text-xs text-gray-500">單位名稱 (如：業務部)</label>
+                <input type="text" id="dept" placeholder="單位名稱">
+            </div>
+            <div>
+                <label class="text-xs text-gray-500">收件人姓名</label>
+                <input type="text" id="receiver" placeholder="收件人姓名">
+            </div>
+        </div>
 
-<div class="container">
-    <div class="header-section">
-        <h2 id="mainTitle">台灣精銳包裹登記平台</h2>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="text-xs text-gray-500">同事的 Email (必填)</label>
+                <input type="email" id="email" placeholder="Email">
+            </div>
+            <div>
+                <label class="text-xs text-gray-500">包裹類型</label>
+                <select id="type">
+                    <option value="📦 一般包裹">📦 一般包裹</option>
+                    <option value="✉️ 掛號信件">✉️ 掛號信件</option>
+                    <option value="🍕 外送/美食">🍕 外送/美食</option>
+                    <option value="⚠️ 重要急件">⚠️ 重要急件</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="text-xs text-gray-500">物流公司 (如：黑貓)</label>
+            <input type="text" id="courier" placeholder="物流公司">
+        </div>
+
+        <div class="mb-6">
+            <label class="text-xs text-gray-500">備註 (如：代付100元)</label>
+            <input type="text" id="note" placeholder="備註內容">
+        </div>
+
+        <button onclick="sendParcel()" id="saveBtn" class="w-full py-3 btn-submit rounded font-bold flex items-center justify-center gap-2">
+            <span>➕ 登記並加入清單</span>
+        </button>
+
+        <div class="mt-8 border-t pt-4">
+            <input type="text" placeholder="🔍 快速搜尋..." class="text-sm">
+        </div>
     </div>
 
-    <div class="input-group">
-        <input type="text" id="dept" placeholder="單位名稱 (如: 業務部)">
-        <input type="text" id="receiver" placeholder="收件人姓名">
-        <input type="email" id="email" placeholder="同事的 Email (必填)">
-        <select id="type">
-            <option value="一般包裹">📦 一般包裹</option>
-            <option value="掛號信件">✉️ 掛號信件</option>
-            <option value="低溫冷藏">❄️ 低溫冷藏</option>
-        </select>
-        <input type="text" id="logistics" placeholder="物流公司 (如: 黑貓)">
-        <input type="text" id="note" placeholder="備註 (如: 代付100元)" class="full-width">
-        <button class="add-btn" onclick="addParcel()">➕ 登記並加入清單</button>
-    </div>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxm4CDB5i8V2CX6lbCu4gxI2TH-jGKFznI8H01CLlnKEh9Fdr71pfeQr7ai6VcVtAvomw/exec";
 
-    <input type="text" class="search-bar" id="searchBar" onkeyup="searchParcels()" placeholder="🔍 快速搜尋...">
-    <div id="parcelList"></div>
-</div>
+        async function sendParcel() {
+            const btn = document.getElementById('saveBtn');
+            const data = {
+                type: 'parcel',
+                dept: document.getElementById('dept').value,
+                receiver: document.getElementById('receiver').value,
+                email: document.getElementById('email').value,
+                pType: document.getElementById('type').value,
+                courier: document.getElementById('courier').value,
+                note: document.getElementById('note').value
+            };
 
-<script>
-    let parcels = [];
+            if(!data.receiver || !data.courier) { alert("請填寫收件人與物流公司！"); return; }
 
-    function addParcel() {
-        const dept = document.getElementById('dept').value;
-        const receiver = document.getElementById('receiver').value;
-        const email = document.getElementById('email').value;
-        const type = document.getElementById('type').value;
-        const logistics = document.getElementById('logistics').value;
-        const note = document.getElementById('note').value;
+            btn.disabled = true;
+            btn.innerHTML = "傳輸中...";
 
-        if (!receiver || !email) { alert("姓名與 Email 為必填！"); return; }
-
-        const newParcel = {
-            id: Date.now(),
-            dept, receiver, email, type, logistics, note,
-            time: new Date().toLocaleString(),
-            status: 'pending'
-        };
-
-        parcels.unshift(newParcel);
-        renderParcels();
-    }
-
-    function sendEmail(id) {
-        const p = parcels.find(x => x.id === id);
-        const subject = encodeURIComponent(`[包裹到貨通知] 您好，您的 ${p.type} 已送達櫃台`);
-        const body = encodeURIComponent(`您好：\n\n您有一件來自 [${p.logistics}] 的 ${p.type} 已送達總機櫃台。\n登記時間：${p.time}\n備註：${p.note || '無'}\n\n請撥冗至櫃台領取，謝謝。`);
-        window.location.href = `mailto:${p.email}?subject=${subject}&body=${body}`;
-    }
-
-    function renderParcels(filter = '') {
-        const list = document.getElementById('parcelList');
-        list.innerHTML = '';
-        parcels.filter(p => p.receiver.includes(filter) || p.dept.includes(filter)).forEach(p => {
-            const card = document.createElement('div');
-            card.className = 'parcel-card';
-            card.innerHTML = `
-                <div class="info">
-                    <b>[${p.dept}] ${p.receiver}</b>
-                    <p>${p.type} | ${p.logistics} <br> <small>${p.time}</small></p>
-                    ${p.note ? `<p style="color:red">📝 ${p.note}</p>` : ''}
-                </div>
-                <div class="btn-group">
-                    <button class="btn-mail" onclick="sendEmail(${p.id})">📧 寄信</button>
-                    <div class="status ${p.status}" onclick="toggleStatus(${p.id})">
-                        ${p.status === 'pending' ? '待領' : '已領'}
-                    </div>
-                </div>
-            `;
-            list.appendChild(card);
-        });
-    }
-
-    function toggleStatus(id) {
-        const p = parcels.find(x => x.id === id);
-        p.status = p.status === 'pending' ? 'done' : 'pending';
-        renderParcels();
-    }
-
-    function searchParcels() {
-        renderParcels(document.getElementById('searchBar').value);
-    }
-</script>
-
+            try {
+                await fetch(`${SCRIPT_URL}?type=parcel&courier=${encodeURIComponent(data.courier)}&receiver=${encodeURIComponent(data.receiver)}&dept=${encodeURIComponent(data.dept)}&note=${encodeURIComponent(data.note)}&pType=${encodeURIComponent(data.pType)}`, { mode: 'no-cors' });
+                alert(`✅ 登記成功！\n已將 ${data.receiver} 的包裹紀錄至雲端。`);
+                location.reload(); 
+            } catch (e) {
+                alert("連線失敗！");
+                btn.disabled = false;
+                btn.innerHTML = "<span>➕ 登記並加入清單</span>";
+            }
+        }
+    </script>
 </body>
 </html>
