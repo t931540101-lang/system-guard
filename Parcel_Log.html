@@ -2,174 +2,76 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">台灣精銳包裹登記平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>台灣精銳 | 雲端包裹登記系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --primary-color: #d32f2f; --secondary-color: #555; --bg-color: #f0f2f5; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg-color); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 700px; width: 100%; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-        .header-section { text-align: center; margin-bottom: 20px; border-bottom: 3px solid var(--primary-color); padding-bottom: 10px; }
-        
-        /* 輸入區佈局 */
-        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        input, select { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; outline: none; }
-        input:focus { border-color: var(--primary-color); box-shadow: 0 0 5px rgba(211,47,47,0.2); }
-        .full-width { grid-column: span 2; }
-
-        /* 物流快速點選標籤 */
-        .logistics-tags { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
-        .tag { background: #f8f9fa; padding: 6px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid #ddd; transition: 0.2s; }
-        .tag:hover { background: #ffebee; border-color: var(--primary-color); }
-        .tag.active { background: var(--primary-color); color: white; }
-
-        button.add-btn { grid-column: span 2; background: var(--primary-color); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        button.add-btn:hover { background: #b71c1c; }
-
-        /* 搜尋與清單 */
-        .search-bar { width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 25px; margin: 25px 0 15px; box-sizing: border-box; font-size: 16px; }
-        .parcel-card { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary-color); }
-        .info b { font-size: 18px; color: #333; }
-        .info p { margin: 4px 0; color: #666; font-size: 14px; }
-        .note-text { color: #d32f2f; font-weight: bold; margin-top: 5px !important; }
-
-        .btn-group { display: flex; flex-direction: column; gap: 8px; min-width: 80px; }
-        .btn-mail { background: #fb8c00; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .status { padding: 8px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; text-align: center; }
-        .status.pending { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-        .status.done { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #0f172a; color: white; }
+        .log-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body>
+<body class="p-4">
+    <header class="text-center mb-6">
+        <h1 class="text-3xl font-black text-yellow-500 italic">包裹自動登記</h1>
+        <p class="text-[10px] text-slate-500 tracking-widest uppercase">Cloud Sync System</p>
+    </header>
 
-<div class="container">
-    <div class="header-section">
-        <h2 id="mainTitle">台灣精銳總機專用包裹登記系統</h2>
+    <div class="max-w-md mx-auto space-y-4">
+        <section class="log-card p-4 rounded-2xl border border-slate-700">
+            <label class="block text-xs font-bold text-slate-400 mb-2">物流公司 / 貨運名稱</label>
+            <select id="courier" class="w-full p-3 bg-slate-800 rounded-xl text-xl font-bold outline-none border-2 border-transparent focus:border-yellow-500">
+                <option value="黑貓宅急便">黑貓宅急便</option>
+                <option value="新竹物流">新竹物流</option>
+                <option value="嘉里大榮">嘉里大榮</option>
+                <option value="郵局">中華郵政</option>
+                <option value="外送 (Foodpanda/Uber)">外送平台</option>
+                <option value="其他">其他 (請自行備註)</option>
+            </select>
+        </section>
+
+        <section class="log-card p-4 rounded-2xl border border-slate-700">
+            <label class="block text-xs font-bold text-slate-400 mb-2">收件人姓名 (或單位)</label>
+            <input type="text" id="receiver" placeholder="例如：班長 / 辦公室" class="w-full p-3 bg-slate-800 rounded-xl text-xl font-bold outline-none border-2 border-transparent focus:border-yellow-500">
+        </section>
+
+        <button onclick="uploadParcel()" id="saveBtn" class="w-full py-5 bg-yellow-600 rounded-2xl text-2xl font-black shadow-[0_6px_0_#854d0e] active:shadow-none active:translate-y-1">
+            確認登記並同步雲端
+        </button>
+
+        <p class="text-center text-[10px] text-slate-500 mt-4">※ 登記後資料將自動彙整至指揮部後台</p>
     </div>
 
-    <div class="input-group">
-        <input type="text" id="dept" placeholder="單位名稱 (如: 業務部)">
-        <input type="text" id="receiver" placeholder="收件人姓名">
-        <input type="email" id="email" placeholder="同事 Email (可只打名字後補)">
-        <select id="type">
-            <option value="一般包裹">📦 一般包裹</option>
-            <option value="掛號信件">✉️ 掛號信件</option>
-            <option value="低溫冷藏">❄️ 低溫冷藏</option>
-            <option value="外送美食">🛵 外送美食</option>
-        </select>
-        
-        <div class="full-width">
-            <div class="logistics-tags">
-                <span class="tag" onclick="setLogistics('黑貓宅急便')">🐱 黑貓</span>
-                <span class="tag" onclick="setLogistics('大榮貨運')">🚛 大榮</span>
-                <span class="tag" onclick="setLogistics('新竹物流')">📦 新竹</span>
-                <span class="tag" onclick="setLogistics('中華郵政')">📮 郵局</span>
-                <span class="tag" onclick="setLogistics('')">✏️ 小鉛筆手動</span>
-            </div>
-            <input type="text" id="logistics" placeholder="物流公司名稱" style="width:100%; box-sizing:border-box;">
-        </div>
+    <script>
+        async function uploadParcel() {
+            const courier = document.getElementById('courier').value;
+            const receiver = document.getElementById('receiver').value;
+            const btn = document.getElementById('saveBtn');
 
-        <input type="text" id="note" placeholder="備註 (如: 代付150元, 箱損...)" class="full-width">
-        <button class="add-btn" onclick="addParcel()">➕ 登記並加入清單</button>
-    </div>
+            if(!receiver) { alert('請輸入收件人！'); return; }
 
-    <input type="text" class="search-bar" id="searchBar" onkeyup="searchParcels()" placeholder="🔍 快速搜尋單位、姓名、物流或備註...">
-    <div id="parcelList"></div>
-</div>
+            btn.disabled = true;
+            btn.innerText = "正在傳輸...";
+            btn.classList.add('opacity-50');
 
-<script>
-    let parcels = [];
-
-    // 1. 設定物流名稱
-    function setLogistics(name) {
-        const input = document.getElementById('logistics');
-        input.value = name;
-        if (name === '') input.focus();
-    }
-
-    // 2. 增加包裹
-    function addParcel() {
-        const dept = document.getElementById('dept').value;
-        const receiver = document.getElementById('receiver').value;
-        const email = document.getElementById('email').value;
-        const type = document.getElementById('type').value;
-        const logistics = document.getElementById('logistics').value;
-        const note = document.getElementById('note').value;
-
-        if (!receiver || !email) { alert("姓名與 Email 是必填項目喔！"); return; }
-
-        const newParcel = {
-            id: Date.now(),
-            dept, receiver, email, type, logistics, note,
-            time: new Date().toLocaleString('zh-TW', { hour12: false }),
-            status: 'pending'
-        };
-
-        parcels.unshift(newParcel);
-        clearForm();
-        renderParcels();
-    }
-
-    function clearForm() {
-        document.getElementById('receiver').value = '';
-        document.getElementById('email').value = '';
-        document.getElementById('logistics').value = '';
-        document.getElementById('note').value = '';
-    }
-
-    // 3. 寄送郵件通知
-    function sendEmail(id) {
-        const p = parcels.find(x => x.id === id);
-        let targetEmail = p.email;
-        // 如果沒打 @ 幫她補上公司網域 (班長可自行修改)
-        if (!targetEmail.includes('@')) targetEmail += "@gmail.com"; 
-
-        const subject = encodeURIComponent(`[台灣精銳包裹通知] 您好，您的 ${p.type} 已送達`);
-        const body = encodeURIComponent(`[領取通知]\n\n您好：\n您有一件來自 [${p.logistics}] 的 ${p.type} 已送達總機櫃台。\n\n登記時間：${p.time}\n備註事項：${p.note || '無'}\n\n※ 請撥冗至櫃台領取，謝謝您。`);
-        
-        window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
-    }
-
-    // 4. 渲染清單
-    function renderParcels(filter = '') {
-        const list = document.getElementById('parcelList');
-        list.innerHTML = '';
-        const f = filter.toLowerCase();
-
-        parcels.filter(p => 
-            p.receiver.toLowerCase().includes(f) || 
-            p.dept.toLowerCase().includes(f) || 
-            p.logistics.toLowerCase().includes(f) ||
-            p.note.toLowerCase().includes(f)
-        ).forEach(p => {
-            const card = document.createElement('div');
-            card.className = 'parcel-card';
-            card.innerHTML = `
-                <div class="info">
-                    <b>[${p.dept}] ${p.receiver}</b>
-                    <p>${p.type} | ${p.logistics} | ${p.time}</p>
-                    ${p.note ? `<p class="note-text">⚠️ 備註：${p.note}</p>` : ''}
-                </div>
-                <div class="btn-group">
-                    <button class="btn-mail" onclick="sendEmail(${p.id})">📧 寄信</button>
-                    <div class="status ${p.status}" onclick="toggleStatus(${p.id})">
-                        ${p.status === 'pending' ? '🔴 待領' : '🟢 已領'}
-                    </div>
-                </div>
-            `;
-            list.appendChild(card);
-        });
-    }
-
-    function toggleStatus(id) {
-        const p = parcels.find(x => x.id === id);
-        p.status = p.status === 'pending' ? 'done' : 'pending';
-        renderParcels(document.getElementById('searchBar').value);
-    }
-
-    function searchParcels() {
-        renderParcels(document.getElementById('searchBar').value);
-    }
-</script>
-
+            // 妳剛剛給我的新網址
+            const scriptUrl = "https://script.google.com/macros/s/AKfycbx1H2w_DCZaOOFvRUK86A6jbAWxAwvXO5LxhFYNDT43XoLIbi0Dsh2mpAj2F5zhfPFqRw/exec";
+            
+            try {
+                // 使用 type=parcel 告訴後台這是包裹資料
+                await fetch(`${scriptUrl}?type=parcel&courier=${encodeURIComponent(courier)}&receiver=${encodeURIComponent(receiver)}`, { mode: 'no-cors' });
+                
+                alert('📦 登記成功！資料已同步至後台。');
+                document.getElementById('receiver').value = ''; // 清空輸入框
+                btn.innerText = "確認登記並同步雲端";
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            } catch (error) {
+                alert('連線失敗，請檢查網路！');
+                btn.innerText = "重試一次";
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
